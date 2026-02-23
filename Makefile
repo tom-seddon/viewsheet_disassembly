@@ -35,7 +35,8 @@ all:
 	$(_V)$(SHELLCMD) mkdir "$(BUILD)"
 	$(_V)$(MAKE) _assemble FILE=verB1.0_var1 "DEST=ViewSheet vB1.0 [variant 1]"
 	$(_V)$(MAKE) _assemble FILE=verB1.0_var2 "DEST=ViewSheet vB1.0 [variant 2]"
-	$(_V)$(PYTHON) "bin/romdiffs.py" -a "orig" -b "$(BUILD)" "ViewSheet vB1.0 [variant 1].rom" "ViewSheet vB1.0 [variant 2].rom"
+	$(_V)$(MAKE) _assemble FILE=verB1.0_var3 "DEST=ViewSheet vB1.0 [variant 3]"
+	$(_V)$(PYTHON) "bin/romdiffs.py" -a "orig" -b "$(BUILD)" "ViewSheet vB1.0 [variant 1].rom" "ViewSheet vB1.0 [variant 2].rom" "ViewSheet vB1.0 [variant 3].rom"
 
 .PHONY:_assemble
 _assemble:

@@ -1,7 +1,14 @@
+; Feature/variant flags/hacks/etc.
+;
+; If there's any obvous name for what these toggles might do, it gets
+; a name. Otherwise, it's just named after the first version I
+; encountered that happened to need this.
+
                 .weak
 b10_var2=false
 
-sideways_ram_protection=true
+; replace sideways RAM protection thingy with 3 x NOPs
+patch_out_sideways_ram_protection=false
                 
                 .endweak
 
@@ -1353,6 +1360,10 @@ L8685:
                 bne L8693           ; taken if parasite
                 .if b10_var2
                 bit L006E       ; ???
+                .elif patch_out_sideways_ram_protection
+                nop
+                nop
+                nop
                 .else
                 inc L8693+1         ; wtf. sideways RAM protection mechanism, presumably??
                 .endif
