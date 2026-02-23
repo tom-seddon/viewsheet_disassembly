@@ -12,7 +12,9 @@ in [The BBC Micro ROM
 Library](https://tobylobster.github.io/rom_library/), or in this repo
 in the `orig` folder:
 
-- B1.0 [variant 1] - supplied with Master 128 MOS 3.20
+- [B1.0 [variant
+  1]](https://tobylobster.github.io/rom_library/?md5=7d5a80a8ce929d0a0f6ca8626cb9f436) -
+  supplied with Master 128 MOS 3.20
 - B1.0 [variant 2] - similar to variant 1, but with the sideways RAM
   protection check disabled, and an extra mystery byte that shuffle
   some of the code around. Presumably built from the original source
