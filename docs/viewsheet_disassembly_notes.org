@@ -1,0 +1,152 @@
+#+STARTUP: overview
+
+* general notes
+
+- the FP routines look to be the ones from the BASIC 2 ROM, pretty
+  much
+
+
+* book refs
+
+- ABRUG :: Advanced BASIC ROM User Guide
+- BMC :: BBC Micro Compendium
+- AUG :: Advanced User Guide
+
+See https://github.com/bitshifters/bbc-documents/
+
+** BMC
+
+- Convert number to string :: p372
+
+* =orig=
+
+From TobyLobster's ROM library.
+
+Marked as good:
+
+- ViewSheet vB1.0 [variant 1].rom
+- ViewSheet vA0.7 [variant 1].rom
+- ViewSheet v1.0 [variant 3].rom
+
+Marked as bad:
+
+- Viewsheet v1.0 [variant 4] [bad].rom
+- Viewsheet v1.0 [variant 5] [bad].rom
+
+Other stuff found when searching for =ViewSheet=, that aren't
+included:
+
+- Caspl MOS 343 :: identical to MOS 3.50 B1.01
+- Master MOS v3.20 [variant 4] [64k] [?] :: bad ([[https://www.stardot.org.uk/forums/viewtopic.php?p=477477#p477477][some notes]])
+
+* Master MOS versions
+
+- MOS 3.20 :: ViewSheet vB1.0 [variant 1].rom
+- [[https://stardot.org.uk/forums/viewtopic.php?t=18510][FinMOS 3.29]] :: Viewsheet B1.01.MOS 3.50.rom
+- MOS 3.50 :: Viewsheet B1.01.MOS 3.50.rom
+
+* Version notes
+
+** ViewSheet B1.0 variants
+
+*** Variant 1
+
+The authentic original.
+
+*** Variant 2
+
+Looks mostyl like Variant 1, but it might have a whole reassembled
+chunk in the first ~1.5 KB of the file?
+
+From +$00ab to +$0692 inclusive.
+
+Looks like there's a =CLI= just before the start of the service
+routine (that isn't actually used?).
+
+And no sideways RAM protection thingy at +$0690.
+
+*** Variant 3
+
+Same as Variant 1, but with the sideways RAM protection thing at
++$0690 replaced with NOPs.
+
+** ViewSheet B1.01
+
+Everything changed compared to B1.01, but it looks like the code was
+probably mostly similar.
+
+** ViewSheet I1.1
+
+Under 16 KB, but it looks like it could be ok - it ends with what
+looks like =loc_BFFB= (with different constant due to localised error
+messages).
+
+* memory map
+
+684, 689, 68e, 893 - all FP values?
+
+* routine notes
+
+** =copy_5_bytes_QQ=
+
+looks like the same format as p59 ABRUG?
+
+|   value | where   | notes | what       |
+|---------+---------+-------+------------|
+|      +1 | byte_31 | A     | sign       |
+|     $00 | byte_32 |       | overflow   |
+|      +0 | byte_33 |       | exponent   |
+| $80/$00 | byte_34 |       | mantissa-1 |
+|      +2 | byte_35 | A     | mantissa-2 |
+|      +3 | byte_36 | A     | mantissa-3 |
+|      +4 | byte_37 | A     | mantissa-4 |
+|     $00 | byte_38 |       | rounding   |
+
+** table 0??
+
+What I've named "slots" might be the arguments or operands.
+
+| name    |  N+2 | noted |
+|---------+------+-------|
+| +       | 0x87 |       |
+| -       | 0x84 |       |
+| *       | 0x05 |       |
+| /       | 0x06 |       |
+| (       | 0x0B |       |
+| ^       | 0x08 |       |
+| )       | 0x03 |       |
+| ,       | 0x02 |       |
+| ABS     | 0x0C |       |
+| ACS     | 0x0D |       |
+| ASN     | 0x0E |       |
+| ATN     | 0x0F |       |
+| AVERAGE | 0x10 |       |
+| CHOOSE  | 0x11 |       |
+| COL     | 0x12 |       |
+| COS     | 0x13 |       |
+| DEG     | 0x14 |       |
+| EXP     | 0x15 |       |
+| IF      | 0x16 |       |
+| INT     | 0x17 |       |
+| LN      | 0x18 |       |
+| LOG     | 0x19 |       |
+| LOOKUP  | 0x1A |       |
+| MAX     | 0x1B |       |
+| MIN     | 0x1C |       |
+| PI      | 0x1D |       |
+| RAD     | 0x1E |       |
+| READ    | 0x1F |       |
+| ROW     | 0x20 |       |
+| SGN     | 0x21 |       |
+| SIN     | 0x22 |       |
+| SQR     | 0x23 |       |
+| TAN     | 0x24 |       |
+| WRITE   | 0x25 |       |
+| =       | 0x26 |       |
+| <>      | 0x27 |       |
+| >=      | 0x28 |       |
+| <=      | 0x29 |       |
+| >       | 0x2A |       |
+| <       | 0x2B |       |
+
+* eof.
