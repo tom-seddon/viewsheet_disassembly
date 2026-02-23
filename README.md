@@ -3,7 +3,7 @@ Acornsoft's ViewSheet.
 
 This is related to my [Acorn MOS
 disassembly](https://github.com/tom-seddon/acorn_mos_disassembly)
-project, some versions of which came with ViewSheet included.
+project, as some versions of the MOS came with ViewSheet included.
 
 # versions covered
 
