@@ -10,11 +10,18 @@ project, as some versions of the MOS came with ViewSheet included.
 The supplied code can build the following versions, which can be found
 in [The BBC Micro ROM
 Library](https://tobylobster.github.io/rom_library/), or in this repo
-in the `orig` folder:
+in the `orig` folder.
+
+Master 128 ROM originals:
 
 - [B1.0 [variant
   1]](https://tobylobster.github.io/rom_library/?md5=7d5a80a8ce929d0a0f6ca8626cb9f436) -
   supplied with Master 128 MOS 3.20
+- [B1.01](https://tobylobster.github.io/rom_library/?md5=1bc68b7c5eba6a2de2a43c9d1d9d983b) -
+  supplied with Master 128 MOS 3.50
+
+Master 128 ROM variants:
+
 - [B1.0 [variant
   2]](https://tobylobster.github.io/rom_library/?md5=26044139006e9ec0960e609354daba41) -
   similar to variant 1, but with the sideways RAM protection check
@@ -24,8 +31,12 @@ in the `orig` folder:
   3]](https://tobylobster.github.io/rom_library/?md5=35ae47c386d347604d41baf2faa042d4) -
   same as variant 1, but with the sideways RAM protection check
   removed with `NOP`s. Presumably a binary patch
-- [B1.01](https://tobylobster.github.io/rom_library/?md5=1bc68b7c5eba6a2de2a43c9d1d9d983b) -
-  supplied with Master 128 MOS 3.50
+
+BBC ROMs marked as good in the ROM library:
+
+- [1.0 [variant
+  3]](https://tobylobster.github.io/rom_library/?md5=08fdaaab2e6c9f993a99060a9297f53b) -
+  marked as known good in the ROM library
 
 This is far from all of the versions available! Coverage may yet
 increase. (But the Master-related versions were the priority.)
