@@ -1,3 +1,12 @@
+                .weak
+b10_var2=false
+
+sideways_ram_protection=true
+                
+                .endweak
+
+;-------------------------------------------------------------------------
+
 L0000=$0
 L0002=$2
 L0003=$3
@@ -116,6 +125,7 @@ entry_Y=$f1
 ; OSBYTE/OSWORD Y value
 escape_flag=$ff
 BRKV=$202
+L0400=$400
 L0500=$500
 L0501=$501
 L0502=$502
@@ -199,6 +209,9 @@ copyright:      .byte 0
 
 ;-------------------------------------------------------------------------
 
+                .if b10_var2
+                .byte $50
+                .endif
 L802B:
                 pha
                 txa
@@ -328,9 +341,9 @@ L80C7:
                 bne rts80C0
                 cli
                 sta L0056
-                lda #$63        ; !! <brk_handler
+                lda #<brk_handler
                 sta BRKV
-                lda #$86        ; !! >brk_handler
+                lda #>brk_handler
                 sta BRKV+1
                 jsr LAE34
                 jsr LAE73
@@ -452,9 +465,9 @@ command_loop_2:
 
 ;-------------------------------------------------------------------------
 
-                lda #$E3        ; !! <OSASCI
+                lda #<OSASCI
                 sta L000F
-                lda #$FF        ; !! >OSASCI
+                lda #>OSASCI
                 sta L000F+1
                 jsr L9421    ; set up OSWORD 0 buffer address - $500
                 ldx #$FF
@@ -519,8 +532,8 @@ L81F7:
 ;-------------------------------------------------------------------------
 
 do_star_command:
-                ldx #0          ; !! <L0500
-                ldy #5          ; !! >L0500
+                ldx #<L0500
+                ldy #>L0500
                 jsr OSCLI
                 jmp command_loop_2
 
@@ -971,24 +984,24 @@ L8467:
 ;-------------------------------------------------------------------------
 
 L8477:
-                ldx #$98        ; !! <L0698
+                ldx #<L0698
                 stx L0500
-                ldx #6          ; !! >L0698
+                ldx #>L0698
                 stx L0501
-                ldx #0          ; !! <L0500
-                ldy #5          ; !! >L0500
+                ldx #<L0500
+                ldy #>L0500
                 jmp OSFILE
 
 ;-------------------------------------------------------------------------
 
 L8488:
                 jsr L8253
-                lda #$C0        ; !! <L06C0
+                lda #<screen_mode
                 sta L050A
-                lda #6          ; !! >L06C0
+                lda #>screen_mode
                 sta L050B
-                ldx #$EC        ; !! <L07EC
-                ldy #7          ; !! >L07EC
+                ldx #<L07EC
+                ldy #>L07EC
                 bne L8456    ; always taken
 
 L849B:
@@ -1021,8 +1034,8 @@ L84A8:
                 lda L0066+2
                 jsr LA961
                 lda #$80        ; OSFIND open for output only
-                ldx #$9E        ; !! <L079E
-                ldy #7          ; !! >L079E
+                ldx #<L079E
+                ldy #>L079E
                 jsr OSFIND
                 sta L0060
                 ldx #5
@@ -1064,9 +1077,9 @@ close_file:
 ;-------------------------------------------------------------------------
 
 L8513:
-                lda #$BF        ; !! <L06BF
+                lda #<L06BF
                 sta L006E
-                lda #6          ; !! >L06BF
+                lda #>L06BF
                 sta L006E+1
                 ldy #0
 
@@ -1090,10 +1103,10 @@ L852E:
 
 L8534:
                 lda L006E+1
-                cmp #7          ; !! >L07EC
+                cmp #>L07EC
                 bne L851D
                 lda L006E
-                cmp #$EC        ; !! <L07EC
+                cmp #<L07EC
                 bne L851D
                 rts
 
@@ -1338,7 +1351,11 @@ L8685:
                 sta L006E      ; store actual address LSB
                 lda is_second_processor; 0 if host, non-0 if parasite
                 bne L8693           ; taken if parasite
+                .if b10_var2
+                bit L006E       ; ???
+                .else
                 inc L8693+1         ; wtf. sideways RAM protection mechanism, presumably??
+                .endif
 
 L8693:
                 lda #0
@@ -3527,8 +3544,8 @@ L930A:
                 sta L006E
                 lda #0
                 sta L006E+1
-                lda #$FE        ; !! <L92FE
-                ldy #$92        ; !! >L92FE
+                lda #<L92FE
+                ldy #>L92FE
                 jsr LAEDA    ; Entry: A=LSB; X=MSB
                 ldy L0064
 
@@ -3721,10 +3738,10 @@ rts9420:
 ;-------------------------------------------------------------------------
 
 L9421:
-                lda #0          ; !! <L0500
+                lda #<L0500
                 sta L0000
                 sta L0066
-                lda #5          ; !! >L0500
+                lda #>L0500
                 sta L0000+1
                 sta L0066+1
 
@@ -4523,9 +4540,9 @@ L985C:
                 jsr LB2FF
 
 L9875:
-                lda #$9E        ; !! <L079E
+                lda #<L079E
                 sta L0006
-                lda #7          ; !! >L079E
+                lda #>L079E
                 sta L0006+1
 
 L987D:
@@ -4614,8 +4631,8 @@ L98DA:          .byte $D7
 
 L98DF:
                 lda #3          ; OSWORD read interval timer
-                ldx #$98        ; !! <L0698
-                ldy #6          ; !! >L0698
+                ldx #<L0698
+                ldy #>L0698
                 jsr OSWORD
                 lda L069C
                 bmi rts9895
@@ -4645,8 +4662,8 @@ L990C:
 
 L990E:
                 stx L0046
-                ldx #$DA        ; !! <L98DA
-                ldy #$98        ; !! >L98DA
+                ldx #<L98DA
+                ldy #>L98DA
                 lda #4          ; OSWORD write interval timer
                 jmp OSWORD
 
@@ -4944,12 +4961,12 @@ L9ADB:
 L9ADE:
                 ror L0056
                 pha
-                ldx #6          ; !! <L069B
-                ldy #$9B        ; !! >L069B
+                ldx #>L069B
+                ldy #<L069B
                 lda L06A5
                 beq L9AEE
-                ldx #0          ; !! <L0400
-                ldy #4          ; !! >L0400
+                ldx #<L0400
+                ldy #>L0400
 
 L9AEE:
                 stx L000F
@@ -5038,17 +5055,17 @@ rts9B43:
 ;-------------------------------------------------------------------------
 
 L9B44:
-                ldx #$74        ; !! <L9B74
+                ldx #<L9B74
                 stx L006A
-                ldx #$9B        ; !! >L9B74
+                ldx #>L9B74
                 bne L9B52
 
 ;-------------------------------------------------------------------------
 
 L9B4C:
-                ldx #$82        ; !! <L9B82
+                ldx #<L9B82
                 stx L006A
-                ldx #$9B        ; !! <L9B82
+                ldx #>L9B82
 
 L9B52:
                 stx L006B
@@ -5341,9 +5358,9 @@ L9C8D:
                 adc #1
                 ldx #0
                 jsr LAEAF
-                lda #$9E        ; !! <L079E
+                lda #<L079E
                 sta L0072
-                lda #7          ; !! >L079E
+                lda #>L079E
                 sta L0073
                 txa
 
@@ -5681,7 +5698,7 @@ L9E09:
                                 ;        ?L005E = string offset
                                 ; exit: BEQ if CR/space/0
                 beq L9E21
-                cmp #$22        ; !! '"'
+                cmp #'"'
                 bne L9E18
                 iny
 
@@ -5689,7 +5706,7 @@ L9E18:
                 lda (L0066),y
                 beq L9E21
                 iny
-                cmp #$22        ; !! '"'
+                cmp #'"'
                 bne L9E23
 
 L9E21:
@@ -5747,7 +5764,7 @@ L9E5A:
                 sty L005E
                 sty L002A
                 pha
-                cmp #$22        ; !! '"'
+                cmp #'"'
                 beq L9E80
                 jsr get_letter_index; get letter index
                                     ; Entry: A=char (A-Z, a-z)
@@ -7401,9 +7418,9 @@ fun_write_QQ:
 ;-------------------------------------------------------------------------
 
 LA713:
-                lda #$98        ; !! <L0698
+                lda #<L0698
                 sta L0006
-                lda #6          ; !! >L0698
+                lda #>L0698
                 sta L0006+1
                 rts
 
@@ -7817,8 +7834,8 @@ LA8FE:
                 sta L0060
                 jsr LA961
                 lda #$C0        ; OSFIND open for update
-                ldx #$9E        ; !! <L079E
-                ldy #7          ; !! >L079E
+                ldx #<L079E
+                ldy #>L079E
                 jsr OSFIND
                 tay
                 beq LA8DA
@@ -8982,8 +8999,8 @@ LAEAF:
                 lda #0
                 sta L006E+1
                 stx L0064
-                lda #$C1        ; !! <LAEC1
-                ldy #$AE        ; !! >LAEC1
+                lda #<LAEC1
+                ldy #>LAEC1
                 jsr LAEDA    ; Entry: A=LSB; X=MSB
                 ldx L0064
                 rts
@@ -9006,8 +9023,8 @@ LAEC1:
 LAED2:
                 stx L006E
                 sty L006E+1
-                lda #$EE        ; !! <OSWRCH
-                ldy #$FF        ; !! >OSWRCH
+                lda #<OSWRCH
+                ldy #>OSWRCH
 
 LAEDA:
                 sta L0041     ; Entry: A=LSB; X=MSB
@@ -10685,11 +10702,11 @@ store_fwa_fp_slot_2:
 ;-------------------------------------------------------------------------
 
 store_fwa_fp_slot_0:
-                lda #$84        ; !! <L0684
+                lda #<fp_slot_0
 
 store_fwa_fp_slot:
                 sta L0006
-                lda #6          ; !! >L0684
+                lda #>fp_slot_0
                 sta L0006+1
 ; !! BD59 in BASIC 2
 
@@ -10719,21 +10736,21 @@ store_fwa:
 ;-------------------------------------------------------------------------
 
 prepare_fp_slot_3:
-                lda #$93        ; !! <$0693
+                lda #<fp_slot_3
                 bne prepare_fp_slot_addr
 
 prepare_fp_slot_1:
-                lda #$89        ; !! <$0689
+                lda #<fp_slot_1
                 bne prepare_fp_slot_addr
 
 prepare_fp_slot_2:
-                lda #$8E        ; !! <$068E
+                lda #<fp_slot_2
                 bne prepare_fp_slot_addr
 
 ;-------------------------------------------------------------------------
 
 prepare_fp_slot_0:
-                lda #$84        ; !! <$0684
+                lda #<fp_slot_0
 
 prepare_fp_slot_addr:
                 sta L0006
@@ -11383,10 +11400,10 @@ fun_sqr_QQ:
 
 LBC23:
                 jsr store_fwa   ; store FWA to (L0006)
-                lda #$84        ; !! <fp_slot_0
+                lda #<fp_slot_0
                 sta L0006
                 jsr LBB16
-                lda #$89        ; !! <fp_slot_1
+                lda #<fp_slot_1
                 sta L0006
                 jsr add_loaded_fwb_to_fwa; !! A500 in BASIC 2
                 dec fwa_exponent
@@ -11439,10 +11456,10 @@ LBC63:
                 pha
                 sty fwa_exponent
                 jsr LB9E8    ; ?? A385 in BASIC 2
-                lda #$93        ; !! <$0693
+                lda #<fp_slot_3
                 jsr store_fwa_fp_slot
-                lda #$A7        ; !! <LBCA7
-                ldy #$BC        ; !! >LBCA7
+                lda #<LBCA7
+                ldy #>LBCA7
                 jsr LBCCA    ; evaluate series table
                                 ; !! A897 in BASIC 2
                 jsr prepare_fp_slot_3
@@ -11454,9 +11471,9 @@ LBC63:
                 sec
                 sbc #$81
                 jsr LB73A
-                lda #$A2        ; !! <LBCA2
+                lda #<LOGTWO
                 sta L0006
-                lda #$BC        ; !! >LBCA2
+                lda #>LOGTWO
                 sta L0006+1
                 jsr LB7A3    ; !! A656 in BASIC 2
                 jsr prepare_fp_slot_0
@@ -11597,8 +11614,8 @@ LBD60:
                 sta fwb_mantissa_1
                 sta fwb_sign
                 jsr LB9E8    ; ?? A385 in BASIC 2
-                lda #$81        ; !! <LBD81
-                ldy #$BD        ; !! >LBD81
+                lda #<LBD81
+                ldy #>LBD81
                 jsr LBCCA    ; evaluate series table
                                 ; !! A897 in BASIC 2
                 jmp LBE9F
@@ -11661,8 +11678,8 @@ LBDD2:
 LBDE4:
                 jsr store_fwa_fp_slot_2
                 jsr LB7A3    ; !! A656 in BASIC 2
-                lda #$BE        ; !! <LBEBE
-                ldy #$BE        ; !! >LBEBE
+                lda #<LBEBE
+                ldy #>LBEBE
                 jsr LBCCA    ; evaluate series table
                                 ; !! A897 in BASIC 2
                 jmp LBE9F
@@ -11731,7 +11748,7 @@ LBE59:
 ; !! AA48 in BASIC 2
 
 LBE5C:
-                lda #$A5        ; !! <HPIHI
+                lda #<HPIHI
                 bne LBE62
 
 ;-------------------------------------------------------------------------
@@ -11739,18 +11756,18 @@ LBE5C:
 ; !! AA4C in BASIC 2
 
 LBE60:
-                lda #$AA        ; !! <HPILO
+                lda #<HPILO
 
 LBE62:
                 sta L0006
-                lda #$BE        ; ; !! >(FP constants table)
+                lda #>fp_constants
                 sta L0006+1
                 rts
 
 ;-------------------------------------------------------------------------
 
 ARGHPI:
-                lda #$AF        ; !! <LHALFPI
+                lda #<HALFPI
                 bne LBE62
 
 ;-------------------------------------------------------------------------
@@ -11776,14 +11793,14 @@ LBE7B:
 
 LBE82:
                 jsr LB967
-                lda #$E2        ; !! <LBEE2
-                ldy #$BE        ; !! >LBEE2
+                lda #<LBEE2
+                ldy #>LBEE2
                 jsr LBCCA    ; evaluate series table
                                 ; !! A897 in BASIC 2
                 jsr store_fwa_fp_slot_2
-                lda #$DD        ; !! <LBEDD
+                lda #<FNUME
                 sta L0006
-                lda #$BE        ; !! >LBEDD
+                lda #>FNUME
                 sta L0006+1
                 jsr load_fwa    ; copy 5 bytes from (L0006) to zp
                                 ; (presumably be a BASIC-style FP value)
@@ -11799,6 +11816,8 @@ LBE9F:
 ;-------------------------------------------------------------------------
 
 ; FP constants. All must share address MSB
+                .page
+fp_constants:
 HPIHI:          .byte $81,$C9, $10, 0, 0; 0 ; -1.570800781E0
 HPILO:          .byte $6F, $15, $77, $7A, $61; 0 ; 4.454455111E-6
 HALFPI:         .byte $81, $49, $F,$DA,$A2; 0 ; 1.570796327E0
@@ -11812,6 +11831,8 @@ LBEBE:          .byte 5; SIN/COS table (BMC p436)
                 .byte $83,$C0, 0, 0, 5      ; 0 ; -6.00000001
                 .byte $81, 0, 0, 0, 0       ; 0 ; 1
 FNUME:          .byte $82, $2D,$F8, $54, $58; 0 ; 2.718281828E0
+                .endpage
+                
 LBEE2:          .byte 7; EXP series table (BMC p438)
                 .byte $83,$E0, $20, $86, $5B; 0 ; -7.003970316
                 .byte $82, $80, $53, $93,$B8; 0 ; -2.005101137
@@ -11821,7 +11842,7 @@ LBEE2:          .byte 7; EXP series table (BMC p438)
                 .byte $82, $80, 0, 0, $C    ; 0 ; -2.000000011
                 .byte $81, 0, 0, 0, 0       ; 0 ; 1
                 .byte $81, 0, 0, 0, 0       ; 0 ; 1
-
+                
 ;-------------------------------------------------------------------------
 
 ; !! AB12 in BASIC 2
@@ -11854,13 +11875,13 @@ LBF1E:
 
 fun_log_QQ:
                 jsr fun_ln_QQ
-                ldy #$9D        ; !! <RPLN10
-                lda #$BC        ; !! >RPLN10
+                ldy #<RPLN10
+                lda #>RPLN10
                 bne LBF38
 
 fun_rad_QQ:
-                ldy #$B4        ; !! <FPID18
-                lda #$BE        ; !! >FPID18
+                ldy #<FPID18
+                lda #>FPID18
 
 LBF38:
                 sty L0006
@@ -11870,8 +11891,8 @@ LBF38:
 ;-------------------------------------------------------------------------
 
 fun_deg:
-                ldy #$B9        ; !! <F180DP
-                lda #$BE        ; !! >F180DP
+                ldy #<F180DP
+                lda #>F180DP
                 bne LBF38
 
 fun_pi:
