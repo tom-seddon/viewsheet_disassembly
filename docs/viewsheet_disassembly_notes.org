@@ -11,7 +11,6 @@
 - the FP routines look to be the ones from the BASIC 2 ROM, pretty
   much
 
-
 * book refs
 
 - ABRUG :: Advanced BASIC ROM User Guide
@@ -28,16 +27,30 @@ See https://github.com/bitshifters/bbc-documents/
 
 From TobyLobster's ROM library.
 
-Marked as good:
+G/B indicates whether ROM is marked as Good or Bad in the library.
 
-- ViewSheet vB1.0 [variant 1].rom
-- ViewSheet vA0.7 [variant 1].rom
-- ViewSheet v1.0 [variant 3].rom
-
-Marked as bad:
-
-- Viewsheet v1.0 [variant 4] [bad].rom
-- Viewsheet v1.0 [variant 5] [bad].rom
+| Name                                          | G/B | Builds |
+|-----------------------------------------------+-----+--------|
+| ViewSheet vA0.7 [variant 1].rom               | G   |        |
+| ViewSheet vA0.7 [variant 2].rom               |     |        |
+| ViewSheet v1.0 [variant 1].rom                |     |        |
+| ViewSheet v1.0 [variant 2].rom                |     |        |
+| ViewSheet v1.0 [variant 3].rom                | G   |        |
+| Viewsheet v1.0 [variant 4] [bad].rom          | B   |        |
+| Viewsheet v1.0 [variant 5] [bad].rom          | B   |        |
+| ViewSheet v1.0 [variant 6].rom                |     |        |
+| ViewSheet v1.0 [variant 7].rom                |     |        |
+| ViewSheet v1.0 [variant 8].rom                |     |        |
+| ViewSheet v1.0 [variant 9].rom                |     |        |
+| ViewSheet v1.0 [variant 10].rom               |     |        |
+| ViewSheet v1.0 [variant 11].rom               |     |        |
+| ViewSheet v1.0 [variant 12].rom               |     |        |
+| ViewSheet vB1.0 [variant 1].rom               | G   | y      |
+| ViewSheet vB1.0 [variant 2].rom               |     | y      |
+| ViewSheet vB1.0 [variant 3].rom               |     | y      |
+| Electron ViewSheet vE1.0.rom                  |     |        |
+| Master MOS v3.50 - ViewSheet vB1.01.rom       |     | y      |
+| Olivetti Prodest PC128S - ViewSheet vI1.1.rom |     |        |
 
 Other stuff found when searching for =ViewSheet=, that aren't
 included:
