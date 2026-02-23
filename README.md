@@ -15,13 +15,17 @@ in the `orig` folder:
 - [B1.0 [variant
   1]](https://tobylobster.github.io/rom_library/?md5=7d5a80a8ce929d0a0f6ca8626cb9f436) -
   supplied with Master 128 MOS 3.20
-- B1.0 [variant 2] - similar to variant 1, but with the sideways RAM
-  protection check disabled, and an extra mystery byte that shuffle
-  some of the code around. Presumably built from the original source
-  code
-- B1.0 [variant 3] - same as variant 1, but with the sideways RAM
-  protection check removed with `NOP`s. Presumably a binary patch
-- B1.01 - supplied with Master 128 MOS 3.50
+- [B1.0 [variant
+  2]](https://tobylobster.github.io/rom_library/?md5=26044139006e9ec0960e609354daba41) -
+  similar to variant 1, but with the sideways RAM protection check
+  disabled, and an extra mystery byte that shuffle some of the code
+  around. Presumably built from the original source code
+- [B1.0 [variant
+  3]](https://tobylobster.github.io/rom_library/?md5=35ae47c386d347604d41baf2faa042d4) -
+  same as variant 1, but with the sideways RAM protection check
+  removed with `NOP`s. Presumably a binary patch
+- [B1.01](https://tobylobster.github.io/rom_library/?md5=1bc68b7c5eba6a2de2a43c9d1d9d983b) -
+  supplied with Master 128 MOS 3.50
 
 This is far from all of the versions available! Coverage may yet
 increase. (But the Master-related versions were the priority.)
