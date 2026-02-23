@@ -1,4 +1,4 @@
-b10_var2=true
+verB10_var2=true
 sideways_ram_protection=false
                 .include "viewsheet.s65"
                 

@@ -7,28 +7,31 @@
                 .weak
 
 ; if true, build B1.0 variant 2
-b10_var2=false
+verB10_var2=false
 
 ; if true, replace sideways RAM protection thingy with 3 x NOPs
 patch_out_sideways_ram_protection=false
 
 ; if true, build B1.01
-B101=false
+verB101=false
 
+; if true, build 1.0
+ver10=false
+                
 ; if true, handle 8-bit input (presumably related to the changes done
 ; for MOS 3.50/MOS 5.11/PC 128 S). Requires 65c02.
 ;
 ; (I guessed at some of the changes)
-handle_8_bit_input=B101
+handle_8_bit_input=verB101
 
 ; if true, include basic sideways RAM protection: a little routine
 ; that tries to modify some a bit of the code (and not in a good way)
 ; unless running in the second processor
-include_sideways_ram_protection=!B101
+include_sideways_ram_protection=!verB101
 
 ; if true, use CMOS instructions here and there, not obviously related
 ; to any other specific feature.
-cmos_instructions=B101
+cmos_instructions=verB101
                 
                 .endweak
 
@@ -225,21 +228,27 @@ service_entry:
 
                 .byte %11000010 ; service entry+language entry
                 .char copyright - language_entry
-                .if B101
+                .if verB101
                 .byte 3
+                .elif ver10
+                .byte 1
                 .else
                 .byte 2         ; version number
                 .endif
 asc_8009:       .text "ViewSheet"
                 .byte 0
-                .if B101
+                .if verB101
                 .text "B1.01"
+                .elif ver10
+                .text "1.0"
                 .else
                 .text "B1.0"
                 .endif
 copyright:      .byte 0
-                .if B101
+                .if verB101
                 .text "(C)1984Acornsoft"
+                .elif ver10
+                .text "(C) 1983 Protechnic"
                 .else
                 .text "(C) 1984 Acornsoft"
                 .endif
@@ -247,10 +256,17 @@ copyright:      .byte 0
 
 ;-------------------------------------------------------------------------
 
-                .if b10_var2
+                .if verB10_var2
                 .byte $50
                 .endif
 L802B:
+                .if ver10
+                cmp #4
+                beq L8033
+                cmp #9
+                bne rts80C0
+L8033:
+                .endif
                 pha
                 txa
                 pha
@@ -260,12 +276,15 @@ L802B:
                 lda $103,x      ; get original A
                 cmp #9
                 beq svc_help
+                .if !ver10
                 cmp #7
                 beq svc_osbyte
                 cmp #2
                 beq svc_private_workspace
                 cmp #4
                 bne svc_done
+                .endif
+                
 ; handle A=4 unrecognised command
                 ldx #$FF
                 dey
@@ -312,14 +331,21 @@ svc_done:
 
 ;-------------------------------------------------------------------------
 
+                .if !ver10
+
 svc_private_workspace:
                 tsx
                 lda $102,x
                 tax
                 lda #0
                 sta $DF0,x
-                beq svc_done
+                beq svc_done    ; always taken
 
+                .endif
+
+;-------------------------------------------------------------------------
+
+                .if !ver10
 svc_osbyte:
                 lda entry_A     ; OSBYTE/OSWORD A value
                 cmp #$A3
@@ -342,7 +368,10 @@ svc_osbyte:
                 sta $101,x
                 lda #0
                 sta $103,x
-                beq svc_done
+                beq svc_done    ; always taken
+                .endif
+
+;-------------------------------------------------------------------------
 
 L80B0:
                 inc L005E
@@ -385,12 +414,14 @@ L80C7:
                 sta BRKV+1
                 jsr LAE34
                 jsr LAE73
+                .if !ver10
                 lda #$83        ; OSBYTE read OSHWN
                 jsr OSBYTE
                 cpx OSWHM
                 bne L80F0
                 cpy OSWHM+1
                 bne L80F0
+                .endif
                 jsr LADD5
                 beq L80F3
 
@@ -441,7 +472,11 @@ L8104:
 ;-------------------------------------------------------------------------
 
                 .byte $D
+                .if ver10
+                .text "Bytes Free "
+                .else
                 .text "Bytes free "
+                .endif
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -456,7 +491,11 @@ L8153:
 
 ;-------------------------------------------------------------------------
 
+                .if ver10
+                .text "Screen Mode "
+                .else
                 .text "Screen mode "
+                .endif
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -465,20 +504,21 @@ L8153:
                 ora #'0'
                 jsr OSWRCH
                 jsr OSNEWL
+                .if !ver10
                 lda L06A5
                 beq command_loop
+                .endif
                 jsr print_following_string; print 0-terminated string following call
                                           ; (if char bit 7 set, jump to command_loop)
-
-;-------------------------------------------------------------------------
-
                 .text "Printer "
                 .byte 0
 
-;-------------------------------------------------------------------------
+                .if ver10
+                lda L06A5
+                beq print_default
+                .endif
 
                 ldx #0
-
 L8184:
                 lda L06A5,x
                 jsr OSASCI
@@ -486,6 +526,12 @@ L8184:
                 beq command_loop
                 inx
                 bne L8184
+
+                .if ver10
+print_default:
+                jsr print_following_string
+                .text "default",13,0
+                .endif
 
 command_loop:
                 jsr OSNEWL
@@ -503,10 +549,12 @@ command_loop_2:
 
 ;-------------------------------------------------------------------------
 
+                .if !ver10
                 lda #<OSASCI
                 sta L000F
                 lda #>OSASCI
                 sta L000F+1
+                .endif
                 jsr L9421    ; set up OSWORD 0 buffer address - $500
                 ldx #$FF
                 stx L0066+2   ; OSWORD 0 max input length
@@ -521,7 +569,9 @@ command_loop_2:
                 .endif
                 ldx #$66
                 lda #0          ; OSWORD get input
+                .if !ver10
                 sta L005D
+                .endif
                 sta L005E
                 tay             ; Y=0
                 jsr OSWORD
@@ -545,7 +595,7 @@ L81CD:
                 jsr LACD9
                 sty L0060
                 bcs L81E3
-                cpy #14
+                cpy #table_2_size
                 bcc L81EF
 
 L81E3:
@@ -585,6 +635,13 @@ do_star_command:
 L820B:
                 jsr LAF4F
                 bcs L8258
+                .if ver10
+                pha
+                and #$7f
+                cmp #8
+                bcs L8258
+                pla
+                .endif
                 jsr L821B
                 bcc L823E
                 jsr LAE26
@@ -697,7 +754,7 @@ L828E:
                 jsr LACD9
                 bcs L8258
                 lda #0
-                cpy #14
+                cpy #table_2_size
                 bcc L8258
                 bne L82A6
                 lda #$FF
@@ -778,9 +835,21 @@ L82E6:
                 bne L8351
 
 L82F8:
+                .if ver10
+                jsr L855F
+                lda #0
+                sta L0502
+                lda #4
+                sta L0503
+                lda #0
+                sta L0506
+                lda #$ff
+                jsr L8477
+                .else
                 ldx #0
                 ldy #4
                 jsr L8467
+                .endif
                 ldx #0
 
 L8301:
@@ -803,11 +872,25 @@ L830D:
                 bne L8351
 
 L831D:
+                .if ver10
+                jsr L855F
+                lda #$c0
+                sta L0502
+                lda #$06
+                sta L0503
+                lda #0
+                sta L0506
+                .endif
                 lda screen_mode
                 sta L0063
+                .if ver10
+                lda #$ff
+                jsr L8477
+                .else
                 ldx #$C0
                 ldy #6
                 jsr L8467
+                .endif
                 lda screen_mode
                 cmp L0063
                 beq L8343
@@ -816,7 +899,7 @@ L831D:
                 lda L0063
                 sta screen_mode
                 jsr LAE73
-
+                
 L833D:
                 jmp L823E
 
@@ -896,7 +979,9 @@ L83A3:
                 tax
                 tya
                 adc L006B
+                .if !ver10
                 bcs L833D
+                .endif
                 cmp HIMEM+1
                 bcc L83B6
                 bne L833D
@@ -904,9 +989,21 @@ L83A3:
                 bcs L833D
 
 L83B6:
+                .if ver10
+                jsr L855F
+                lda L006A
+                sta L0502
+                lda L006B
+                sta L0503
+                lda #0
+                sta L0506
+                lda #$ff
+                jsr L8477
+                .else
                 ldx L006A
                 ldy L006B
                 jsr L8467
+                .endif
                 ldx #$17
                 ldy #0
 
@@ -1016,6 +1113,7 @@ L8456:
 
 ;-------------------------------------------------------------------------
 
+                .if !ver10
 L8467:
                 stx L0502
                 sty L0503
@@ -1023,6 +1121,7 @@ L8467:
                 lda #0
                 sta L0506
                 lda #$FF
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -1341,6 +1440,19 @@ L8654:
 
 ;-------------------------------------------------------------------------
 
+                .if ver10
+L863E:
+                ldx #0
+L8640:
+                lda secret_message,x
+                beq L8660
+                lsr a
+                jsr OSASCI
+                inx
+                bne L8640
+
+                .endif
+                
 L8657:
                 jsr L9ADB
 
@@ -1350,9 +1462,10 @@ L865A:
 L865D:
                 jsr L9AD2
 
+
 L8660:
                 jmp command_loop_2
-
+                
 ;-------------------------------------------------------------------------
 
 brk_handler:
@@ -1395,7 +1508,7 @@ L8685:
                 .if include_sideways_ram_protection
                 lda is_second_processor; 0 if host, non-0 if parasite
                 bne L8693           ; taken if parasite
-                .if b10_var2
+                .if verB10_var2
                 bit L006E       ; ???
                 .elif patch_out_sideways_ram_protection
                 nop
@@ -1487,11 +1600,22 @@ L86E2:
 ;-------------------------------------------------------------------------
 
                 .text "SLOT="
+                .if ver10
+                .byte 0
+                jsr print_following_string
+                .endif
                 .byte $D
                 .text "CONTENTS="
                 .byte 0
 
 ;-------------------------------------------------------------------------
+
+                .if ver10
+                lda #<OSASCI
+                sta L000F
+                lda #>OSASCI
+                sta L000F+1
+                .endif
 
 L8709:
                 jsr L9751
@@ -1626,7 +1750,15 @@ L879F:
 
 L87A2:
                 jsr LA171
+                .if ver10
+                lda #$ff
+                sta L0054
+                sta L0055
+rts87AC:
+                rts
+                .else
                 jmp L9076
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -1725,7 +1857,11 @@ L880A:
                 tay
                 bcs L87BC
                 jsr LA310
+                .if ver10
+                bcs rts87AC
+                .else
                 bcs rts87FB
+                .endif
                 lda #$40
                 sta L004B
                 jsr LAB02
@@ -2133,10 +2269,19 @@ L8A61:
                 bpl L8A61
                 rol L005F
                 bcs L8ABD
+                .if ver10
+                lda L0064
+                pha
+                .endif
                 jsr LAB8B
-
-L8A71:
+                .if ver10
+                pla
+                tax
+                cpx L06C1
+                bne L8A84
+                .else
                 ldx L06C1
+                .endif
                 lda L06CA,x
                 bpl L8A81
                 ldx #0
@@ -2145,6 +2290,7 @@ L8A71:
 
 L8A81:
                 jsr L8343
+L8A84:
                 jsr LA2F9
                 lda #9
 
@@ -2185,7 +2331,7 @@ L8ABD:
 
 ;-------------------------------------------------------------------------
 
-                .if !B101
+                .if !verB101
 L8AC2:
                 jsr LAB02
                 bcs rts8AD3
@@ -2591,8 +2737,12 @@ L8D35:
 L8D3F:
                 inc L004A
                 ldx #$FF
+                .if ver10
+                jmp L8BE1
+                .else
                 jsr L8BE1
                 jmp flush_input_buffer
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -3167,9 +3317,14 @@ L9071:
 ;-------------------------------------------------------------------------
 
 L9076:
+                .if ver10
+                dec L0054
+                dec L0055
+                .else
                 lda #$FF
                 sta L0054
                 sta L0055
+                .endif
                 rts
 
 ;-------------------------------------------------------------------------
@@ -4787,6 +4942,10 @@ L9927:
                 dey
                 bne L9927
 
+                .if ver10
+                sta L005D
+                .endif
+
 L9931:
                 ldx #1
                 stx L0070
@@ -5634,7 +5793,11 @@ L9D5A:
 L9D64:
                 dey
                 lda fp_slot_0,y
+                .if ver10
+                clc
+                .else
                 sec
+                .endif
                 bne L9D50
 
 L9D6B:
@@ -8894,7 +9057,13 @@ LAD81:
 ;-------------------------------------------------------------------------
 
 LAD84:
+                .if ver10
+                lda #$15
+                ldx #$00
+                jsr OSBYTE
+                .else
                 jsr flush_input_buffer
+                .endif
                 jsr OSRDCH
                 cmp #27
                 .if handle_8_bit_input
@@ -8962,10 +9131,12 @@ pla_rts:
 
 ;-------------------------------------------------------------------------
 
+                .if !ver10
 flush_input_buffer:
                 lda #$15        ; OSBYTE flush specific buffer
                 ldx #0          ; 0 = input buffer
                 jmp OSBYTE
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -9112,6 +9283,7 @@ LAE34:
                 dex
                 dex
                 stx num_rows    ; (num displays rows minus 3)
+                .if !ver10
                 lda #$A3        ; OSBYTE Application Support
                 ldx #$FF        ; $ff = View family
                 stx is_second_processor; 0 if host, non-0 if parasite
@@ -9119,10 +9291,14 @@ LAE34:
                 jsr OSBYTE
                 ldx #0
                 cpy #2
-                .if !B101
+                .if !verB101
                 beq LAE70
                 .endif
+                .endif
                 lda #$82        ; OSBYTE read machine higher order address
+                .if ver10
+                sta is_second_processor
+                .endif
                 jsr OSBYTE
                 iny             ; Y=0 if I/O processor
                 bne rtsAE72 ; taken if parasite
@@ -9558,17 +9734,21 @@ LAF99:      .byte '+'
                 .byte $6F       ; o
                 .byte $A
 ; table of words??
-LB084:      .word 10
+LB084:
+                .word 10
                 .word 100
                 .word 1000
                 .word 10000
-                .byte $4D
-                .byte $52
-                .byte $4A
-                .byte $43
+                .if !ver10
+                .byte $4D       ; M
+                .byte $52       ; R
+                .byte $4A       ; J
+                .byte $43       ; C
                 .byte 0
-LB091:      .byte $44
-                .byte $41
+                .endif
+LB091:
+                .byte $44       ; D
+                .byte $41       ; A
                 .byte $46       ; F
                 .byte 0
                 .byte $4C       ; L
@@ -9591,6 +9771,9 @@ command: .macro
                 .endmacro
                 
 commands:
+                .if ver10
+                .command "JCP",$80
+                .endif
                 .command "PROtect",$81
                 .command "PRINTEr",$81
                 .command "LW",$81
@@ -9695,7 +9878,11 @@ table_0:        .word LA53A; 0
                 .word oper_le_QQ    ; 40
                 .word oper_gt_QQ    ; 41
                 .word ope_lt_QQ     ; 42
-table_2:        .word L828C; 0
+table_2:
+                .if ver10
+                .word L863E
+                .endif
+                .word L828C; 0
                 .word L82E6  ; 1
                 .word L830D  ; 2
                 .word L838C  ; 3
@@ -9709,6 +9896,7 @@ table_2:        .word L828C; 0
                 .word L8657  ; 11
                 .word L820B  ; 12
                 .word L8413  ; 13
+table_2_size=(*-table_2)/2
 table_4:        .word L80F3; 0
                 .word L87A2  ; 1
                 .word L8DB4  ; 2
@@ -9735,7 +9923,7 @@ table_4:        .word L80F3; 0
                 .word L89AE   ; 23
                 .word L89B2   ; 24
                 .word L87A2   ; 25
-                .if B101
+                .if verB101
                 .word rts9B12   ; 26
                 .else
                 .word L8AC2   ; 26
@@ -9750,6 +9938,17 @@ table_4:        .word L80F3; 0
                 .word L88D8   ; 34
                 .word L8C5A   ; 35
                 .word L8CC5   ; 36
+
+                .if ver10
+secret_message:
+                .byte 'M'<<1
+                .byte 'R'<<1
+                .byte 'J'<<1
+                .byte 'C'<<1
+                .byte 13<<1
+                .byte 0
+                .endif
+
 table_6:        .word LA3F5; 0
                 .word LA3F8  ; 1
                 .word LA3D7  ; 2
@@ -9769,11 +9968,14 @@ table_6:        .word LA3F5; 0
                 .word L90CA  ; 16
                 .word L90CE  ; 17
                 .word L90B8  ; 18
-
+                
 ;-------------------------------------------------------------------------
 
 LB27F:
                 jsr load_fwb    ; load FWB from (L0006) (equivalent to A34E in BASIC 2??)
+                .if ver10
+                ldy #0
+                .endif
                 lda fwb_sign
                 and #$80
                 sta fwb_sign
@@ -11146,7 +11348,7 @@ LB994:
 
 ; unused code??
                 
-                .if !B101
+                .if !verB101
                 jsr LB94D
                 jsr inc_fwa_mantissa
                 jmp LB94D
@@ -12262,7 +12464,7 @@ LBFFB:
 
 ;-------------------------------------------------------------------------
 
-                .if B101
+                .if verB101
                 .fill $c000-*,$ff
                 .endif
 

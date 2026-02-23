@@ -39,11 +39,19 @@ all:
 	$(_V)$(MAKE) _assemble FILE=verB1.0_var2 "DEST=ViewSheet vB1.0 [variant 2]"
 	$(_V)$(MAKE) _assemble FILE=verB1.0_var3 "DEST=ViewSheet vB1.0 [variant 3]"
 	$(_V)$(MAKE) _assemble FILE=verB1.01 "DEST=Master MOS v3.50 - ViewSheet vB1.01" CMOS=1
-	$(_V)$(PYTHON) "bin/romdiffs.py" -a "orig" -b "$(BUILD)" "ViewSheet vB1.0 [variant 1].rom" "ViewSheet vB1.0 [variant 2].rom" "ViewSheet vB1.0 [variant 3].rom" "Master MOS v3.50 - ViewSheet vB1.01.rom"
+	$(_V)$(MAKE) _assemble FILE=ver1.0_var3 "DEST=ViewSheet v1.0 [variant 3]"
+	$(_V)$(PYTHON) "bin/romdiffs.py" -a "orig" -b "$(BUILD)" "ViewSheet vB1.0 [variant 1].rom" "ViewSheet vB1.0 [variant 2].rom" "ViewSheet vB1.0 [variant 3].rom" "Master MOS v3.50 - ViewSheet vB1.01.rom" "ViewSheet v1.0 [variant 3].rom"
 
 .PHONY:_assemble
 _assemble:
 	$(_V)$(TASS) $(if $(CMOS),--m65c02,--m6502) -L "$(BUILD)/$(DEST).lst" -o "$(BUILD)/$(DEST).rom" "src/$(FILE).s65"
+
+##########################################################################
+##########################################################################
+
+.PHONY:clean
+clean:
+	$(_V)$(SHELLCMD) rm-tree "$(BUILD)"
 
 ##########################################################################
 ##########################################################################
