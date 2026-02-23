@@ -44,10 +44,8 @@ the following from inside the working copy:
 
 ## prerequisites
 
+* Unix-type system
 * Python 3.x
-
-On Unix:
-
 * [`64tass`](http://tass64.sourceforge.net/) (I use r3243)
 * GNU Make
 
