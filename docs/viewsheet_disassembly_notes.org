@@ -48,7 +48,7 @@ G/B indicates whether ROM is marked as Good or Bad in the library.
 | ViewSheet vB1.0 [variant 1].rom               | G   | y      | https://tobylobster.github.io/rom_library/?md5=7d5a80a8ce929d0a0f6ca8626cb9f436 |
 | ViewSheet vB1.0 [variant 2].rom               |     | y      | https://tobylobster.github.io/rom_library/?md5=26044139006e9ec0960e609354daba41 |
 | ViewSheet vB1.0 [variant 3].rom               |     | y      | https://tobylobster.github.io/rom_library/?md5=35ae47c386d347604d41baf2faa042d4 |
-| Electron ViewSheet vE1.0.rom                  |     |        | https://tobylobster.github.io/rom_library/?md5=d96ad778fef8b67ab55c1738fc5ec907 |
+| Electron ViewSheet vE1.0.rom                  |     | y      | https://tobylobster.github.io/rom_library/?md5=d96ad778fef8b67ab55c1738fc5ec907 |
 | Master MOS v3.50 - ViewSheet vB1.01.rom       |     | y      | https://tobylobster.github.io/rom_library/?md5=1bc68b7c5eba6a2de2a43c9d1d9d983b |
 | Olivetti Prodest PC128S - ViewSheet vI1.1.rom |     | y      | https://tobylobster.github.io/rom_library/?md5=ad630f9328fdef66ee0d3d8d65f1132f |
 

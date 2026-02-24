@@ -3,10 +3,11 @@
 ; These are in some kind of numerical order.
 
 vA07=0                        ; A0.7
-v10=10                        ; 1.00
+v10=10                        ; 1.0
+vE10=11                       ; E1.0
 vB10=20                       ; B1.0
-vI11=31                       ; I1.1
 vB101=30                      ; B1.01
+vI11=31                       ; I1.1
 
 ;-------------------------------------------------------------------------
 
@@ -44,6 +45,10 @@ italian=false
                 
                 .endweak
 
+                .if version==vE10
+L979D_vE10=$979d
+                .endif
+                
 ;-------------------------------------------------------------------------
 
 texti: .macro etext,itext
@@ -75,7 +80,7 @@ L000E=$e
 L000F=$f
 L0011=$11
 L0012=$12
-OSWHM=$13
+OSHWM=$13
 L0015=$15
 L0016=$16
 L0017=$17
@@ -270,11 +275,15 @@ asc_8009:       .text "ViewSheet"
                 .text "B1.0"
                 .elif version==vI11
                 .text "I1.1"
+                .elif version==vE10
+                .text "E1.0"
                 .else
                 .error
                 .endif
 copyright:      .byte 0
-                .if version==vI11
+                .if version==vE10
+                .text "(C)1984 Kings"
+                .elif version==vI11
                 .text "(C)1984Acorn"
                 .elif version>=vB101
                 .text "(C)1984Acornsoft"
@@ -291,7 +300,7 @@ copyright:      .byte 0
                 .byte $50
                 .endif
 L802B:
-                .if version==v10
+                .if version<vB10
                 cmp #4
                 beq L8033
                 cmp #9
@@ -307,7 +316,7 @@ L8033:
                 lda $103,x      ; get original A
                 cmp #9
                 beq svc_help
-                .if version>v10
+                .if version>=vB10
                 cmp #7
                 beq svc_osbyte
                 cmp #2
@@ -362,7 +371,7 @@ svc_done:
 
 ;-------------------------------------------------------------------------
 
-                .if version>v10
+                .if version>=vB10
 
 svc_private_workspace:
                 tsx
@@ -376,7 +385,7 @@ svc_private_workspace:
 
 ;-------------------------------------------------------------------------
 
-                .if version>v10
+                .if version>=vB10
 svc_osbyte:
                 lda entry_A     ; OSBYTE/OSWORD A value
                 cmp #$A3
@@ -443,14 +452,27 @@ L80C7:
                 sta BRKV
                 lda #>brk_handler
                 sta BRKV+1
+                .if version==vE10
+                lda #$83        ; OSBYTE read OSHWM
+                jsr OSBYTE
+                stx OSHWM+0
+                sty OSHWM+1
+                txa
+                sec
+                adc #$ef
+                sta L0015
+                tya
+                adc #1
+                sta L0015+1
+                .endif
                 jsr LAE34
                 jsr LAE73
-                .if version>v10
+                .if version>=vB10
                 lda #$83        ; OSBYTE read OSHWN
                 jsr OSBYTE
-                cpx OSWHM
+                cpx OSHWM
                 bne L80F0
-                cpy OSWHM+1
+                cpy OSHWM+1
                 bne L80F0
                 .endif
                 jsr LADD5
@@ -492,6 +514,9 @@ L8104:
                 jsr OSBYTE
                 ldx #0
                 jsr L973B
+                .if version==vE10
+                jsr OSNEWL
+                .endif
                 ldx #0
                 jsr LAD28
                 jsr OSNEWL
@@ -503,7 +528,7 @@ L8104:
 ;-------------------------------------------------------------------------
 
                 .byte $D
-                .if version==v10
+                .if version<vB10
                 .text "Bytes Free "
                 .else
                 .texti "Bytes free ","Bytes liberi "
@@ -522,7 +547,7 @@ L8153:
 
 ;-------------------------------------------------------------------------
 
-                .if version>v10
+                .if version>=vB10
                 .text "Screen mode "
                 .else
                 .text "Screen Mode "
@@ -535,7 +560,7 @@ L8153:
                 ora #'0'
                 jsr OSWRCH
                 jsr OSNEWL
-                .if version>v10
+                .if version>=vB10
                 lda L06A5
                 beq command_loop
                 .endif
@@ -544,7 +569,7 @@ L8153:
                 .texti "Printer ","Stampante "
                 .byte 0
 
-                .if version<=v10
+                .if version<vB10
                 lda L06A5
                 beq print_default
                 .endif
@@ -558,7 +583,7 @@ L8184:
                 inx
                 bne L8184
 
-                .if version<=v10
+                .if version<vB10
 print_default:
                 jsr print_following_string
                 .text "default",13,0
@@ -666,7 +691,7 @@ do_star_command:
 L820B:
                 jsr LAF4F
                 bcs L8258
-                .if version<=v10
+                .if version<vB10
                 pha
                 and #$7f
                 cmp #8
@@ -869,13 +894,18 @@ L82E6:
                 bne L8351
 
 L82F8:
-                .if version<=v10
+                .if version<vB10
                 jsr L855F
+                .if version==v10
                 lda #0
                 sta L0502
+                .endif
                 lda #4
                 sta L0503
                 lda #0
+                .if version>v10
+                sta L0502
+                .endif
                 sta L0506
                 lda #$ff
                 jsr L8477
@@ -906,23 +936,23 @@ L830D:
                 bne L8351
 
 L831D:
-                .if version<=v10
+                .if version<vB10
                 jsr L855F
-                lda #$c0
+                lda #$c0        ; !! <???
                 sta L0502
-                lda #$06
+                lda #$06        ; !! >???
                 sta L0503
                 lda #0
                 sta L0506
                 .endif
                 lda screen_mode
                 sta L0063
-                .if version<=v10
+                .if version<vB10
                 lda #$ff
                 jsr L8477
                 .else
-                ldx #$C0
-                ldy #6
+                ldx #$C0        ; !! <???
+                ldy #6          ; !! >???
                 jsr L8467
                 .endif
                 lda screen_mode
@@ -1015,7 +1045,7 @@ L83A3:
                 tax
                 tya
                 adc L006B
-                .if version>v10
+                .if version>=vB10
                 bcs L833D
                 .endif
                 cmp HIMEM+1
@@ -1025,7 +1055,7 @@ L83A3:
                 bcs L833D
 
 L83B6:
-                .if version<=v10
+                .if version<vB10
                 jsr L855F
                 lda L006A
                 sta L0502
@@ -1149,7 +1179,7 @@ L8456:
 
 ;-------------------------------------------------------------------------
 
-                .if version>v10
+                .if version>=vB10
 L8467:
                 stx L0502
                 sty L0503
@@ -1373,10 +1403,13 @@ L85AC:
                 sta L073A,x
                 dex
                 bpl L85AC
+                .if version==vE10
+                jsr LADDD
+                .else
                 lda #$83        ; OSBYTE read OSHWM
                 jsr OSBYTE
-                stx OSWHM
-                sty OSWHM+1
+                stx OSHWM
+                sty OSHWM+1
 ; + $01EE
                 txa
                 sec
@@ -1385,18 +1418,23 @@ L85AC:
                 tya
                 adc #1
                 sta L0016
+                .endif
                 ldy #0
                 sty L06BF
                 sty L0051
                 lda #$DD
                 sta L0683
                 sta L000A
+                .if version==vE10
+                sta (L006E),y
+                .else
                 sta (L0015),y
                 inc L0015
                 bne L85DF
                 inc L0016
 
 L85DF:
+                .endif
                 ldx L0015
                 ldy L0016
                 inx
@@ -1476,7 +1514,7 @@ L8654:
 
 ;-------------------------------------------------------------------------
 
-                .if version<=v10
+                .if version<vB10
 L863E:
                 ldx #0
 L8640:
@@ -1611,18 +1649,18 @@ L86A8:
                 tay             ; Y=0
 
 L86D9:
-                sta (OSWHM),y
+                sta (OSHWM),y
                 iny
                 bne L86D9
-                inc OSWHM+1
+                inc OSHWM+1
                 ldx #$EE
 
 L86E2:
-                sta (OSWHM),y
+                sta (OSHWM),y
                 iny
                 dex
                 bne L86E2
-                dec OSWHM+1
+                dec OSHWM+1
                 tay
                 sty L0050
                 sty L0048
@@ -1636,7 +1674,7 @@ L86E2:
 ;-------------------------------------------------------------------------
 
                 .texti "SLOT=","CELLA="
-                .if version<=v10
+                .if version<vB10
                 .byte 0
                 jsr print_following_string
                 .endif
@@ -1710,10 +1748,14 @@ L874F:
                 bcc L8760
                 cmp #$7F
                 bcc L8782
-L8760:
                 .endif
+L8760:
+                .if version==vE10
+                lda #$8B
+                cpx #$1B
+                bne L874F
+                .else                
                 ldy #$FF
-
 L8762:
                 iny
                 ldx L877F,y
@@ -1730,15 +1772,20 @@ L8762:
                 .else
                 adc #$89
                 .endif
-
+                .endif
 L8770:
                 sec
+                .if version==vE10
+                sbc #$8B
+                cmp #$2B
+                .else
                 .if handle_8_bit_input
                 sbc #$7e
                 .else
                 sbc #$8A
                 .endif
                 cmp #$25
+                .endif
                 bcs L874F
                 ldy #4
                 jsr L8685    ; Look up address in table and jump to that routine.
@@ -1748,10 +1795,12 @@ L8770:
 
 ;-------------------------------------------------------------------------
 
+                .if version!=vE10
 L877F:
                 .byte 27
                 .byte 9
                 .byte $FF
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -1786,7 +1835,7 @@ L879F:
 
 L87A2:
                 jsr LA171
-                .if version<=v10
+                .if version<vB10
                 lda #$ff
                 sta L0054
                 sta L0055
@@ -1893,7 +1942,7 @@ L880A:
                 tay
                 bcs L87BC
                 jsr LA310
-                .if version>v10
+                .if version>=vB10
                 bcs rts87FB
                 .else
                 bcs rts87AC
@@ -2758,7 +2807,7 @@ L8D35:
 L8D3F:
                 inc L004A
                 ldx #$FF
-                .if version>v10
+                .if version>=vB10
                 jsr L8BE1
                 jmp flush_input_buffer
                 .else
@@ -3323,7 +3372,7 @@ L9071:
 ;-------------------------------------------------------------------------
 
 L9076:
-                .if version>v10
+                .if version>=vB10
                 lda #$FF
                 sta L0054
                 sta L0055
@@ -4356,11 +4405,11 @@ L9635:
 
 L963C:
                 clc
-                adc OSWHM
+                adc OSHWM
                 sta L006A
                 tya
                 adc L06CD,x
-                adc OSWHM+1
+                adc OSHWM+1
                 sta L006B
                 ldy #0
                 sty L0063
@@ -4516,8 +4565,12 @@ L9704:
 ;-------------------------------------------------------------------------
 
 L9707:
+                .if version==vE10
+                jsr L979D_vE10
+                .else
                 lda #30
                 jsr OSWRCH
+                .endif
                 jsr LAB02
                 php
                 lda #' '
@@ -4638,8 +4691,14 @@ L97A1:
                 ldx #0          ; text foreground colour 0
                 jsr set_text_colour
                 ldx #$87        ; text background colour 7
-                bne set_text_colour
+                bne set_text_colour ; always taken
 
+                .if version==vE10
+L979D:
+                ldy #0
+                beq L97BD
+                .endif
+                
 L97B1:
                 ldy #1
                 lda #contents_x
@@ -4680,7 +4739,13 @@ gotoxy:
                 pla
                 jsr OSWRCH
                 pha
+                .if version==vE10
+                iny
+                .endif
                 tya
+                .if version==vE10
+                dey
+                .endif
                 jsr OSWRCH
                 pla
 
@@ -4893,9 +4958,14 @@ L98DF:
                 jsr OSWORD
                 lda L069C
                 bmi rts9895
+                .if version==vE10
+                jsr L979D
+                tax
+                .else
                 lda #30         ; VDU home
                 jsr OSWRCH
                 ldx #0
+                .endif
                 ldy #3
 
 L98F6:
@@ -5796,7 +5866,7 @@ L9D5A:
 L9D64:
                 dey
                 lda fp_slot_0,y
-                .if version>v10
+                .if version>=vB10
                 sec
                 .else
                 clc
@@ -7025,6 +7095,23 @@ LA375:
                 .byte $9D
                 .byte $9E
                 .byte $9F
+                .elif version==vE10
+                .byte $90
+                .byte $91
+                .byte $92
+                .byte $95
+                .byte $8C
+                .byte $A7
+                .byte $98
+                .byte $99
+                .byte $AE
+                .byte $9F
+                .byte $B3
+                .byte $A0
+                .byte $9C
+                .byte $A1
+                .byte $9E
+                .byte $AD
                 .else
                 .byte $8F
                 .byte $90
@@ -9060,7 +9147,7 @@ LAD81:
 ;-------------------------------------------------------------------------
 
 LAD84:
-                .if version>v10
+                .if version>=vB10
                 jsr flush_input_buffer
                 .else
                 lda #$15
@@ -9134,7 +9221,7 @@ pla_rts:
 
 ;-------------------------------------------------------------------------
 
-                .if version>v10
+                .if version>=vB10
 flush_input_buffer:
                 lda #$15        ; OSBYTE flush specific buffer
                 ldx #0          ; 0 = input buffer
@@ -9191,6 +9278,9 @@ LADCF:
 ;-------------------------------------------------------------------------
 
 LADD5:
+                .if version==vE10
+                jsr LADDD
+                .else
                 lda L0015
                 sec
                 sbc #1
@@ -9198,6 +9288,7 @@ LADD5:
                 lda L0016
                 sbc #0
                 sta L006E+1
+                .endif
                 ldy #0
                 lda (L001F),y
                 cmp #$FF
@@ -9215,6 +9306,20 @@ LADF9:
 
 rtsADFA:
                 rts
+
+;-------------------------------------------------------------------------
+
+                .if version==vE10
+LADDD:
+                lda L0015
+                sec
+                sbc #1
+                sta L006E
+                lda L0015+1
+                sbc #0
+                sta L006E+1
+                rts
+                .endif
 
 ;-------------------------------------------------------------------------
 
@@ -9272,6 +9377,12 @@ LAE34:
                 lda #$87        ; OSBYTE read character at text cursor position
                 jsr OSBYTE
                 sty screen_mode ; save graphics mode number
+                .if version==vE10
+                lda #$FF        ; OSBYTE read/write startup options
+                ldx screen_mode ; EOR bits
+                ldy #+~7        ; AND bits
+                jsr OSBYTE
+                .endif
                 lda #$84        ; OSBYTE read HIMEM
                 jsr OSBYTE
                 stx HIMEM
@@ -9286,7 +9397,7 @@ LAE34:
                 dex
                 dex
                 stx num_rows    ; (num displays rows minus 3)
-                .if version>v10
+                .if version>=vB10
                 lda #$A3        ; OSBYTE Application Support
                 ldx #$FF        ; $ff = View family
                 stx is_second_processor; 0 if host, non-0 if parasite
@@ -9299,7 +9410,7 @@ LAE34:
                 .endif
                 .endif
                 lda #$82        ; OSBYTE read machine higher order address
-                .if version<=v10
+                .if version<vB10
                 sta is_second_processor
                 .endif
                 jsr OSBYTE
@@ -9742,7 +9853,7 @@ LB084:
                 .word 100
                 .word 1000
                 .word 10000
-                .if version>v10
+                .if version>=vB10
                 .text 'MRJC',0
                 .endif
 LB091:
@@ -9770,7 +9881,7 @@ command: .macro
                 .endmacro
                 
 commands:
-                .if version<=v10
+                .if version<vB10
                 .command "JCP",$80
                 .endif
                 .command "PROtect",$81
@@ -9878,7 +9989,7 @@ table_0:        .word LA53A; 0
                 .word oper_gt_QQ    ; 41
                 .word ope_lt_QQ     ; 42
 table_2:
-                .if version<=v10
+                .if version<vB10
                 .word L863E
                 .endif
                 .word L828C; 0
@@ -9896,8 +10007,13 @@ table_2:
                 .word L820B  ; 12
                 .word L8413  ; 13
 table_2_size=(*-table_2)/2
-table_4:        .word L80F3; 0
+table_4:
+                .word L80F3; 0
+                .if version==vE10
+                .word rts9B12   ; 1
+                .else
                 .word L87A2  ; 1
+                .endif
                 .word L8DB4  ; 2
                 .word L89E6  ; 3
                 .word L89C2  ; 4
@@ -9908,6 +10024,39 @@ table_4:        .word L80F3; 0
                 .word L8D49   ; 9
                 .word rts9B12; 10
                 .word rts9B12; 11
+                .if version==vE10
+                .word L87FC     ; 12
+                .word rts9B12   ; 13
+                .word rts9B12   ; 14
+                .word rts9B12   ; 15
+                .word rts9B12   ; 16
+                .word L90B4     ; 17
+                .word rts9B12   ; 18
+                .word L90CE     ; 19
+                .word L918A     ; 20
+                .word L9140     ; 21
+                .word L90CA     ; 22
+                .word rts9B12   ; 23
+                .word L89AE     ; 24
+                .word L8C5A     ; 25
+                .word L89B2     ; 26
+                .word rts9B12   ; 27
+                .word L87CC     ; 28
+                .word L8B2E     ; 29
+                .word L8B61     ; 30
+                .word L8CC5     ; 31
+                .word L87A8     ; 32
+                .word L87A2     ; 33
+                .word L90B8     ; 34
+                .word L9173     ; 35
+                .word rts9B12   ; 36
+                .word L88E6     ; 37
+                .word L88D8     ; 38
+                .word L8AC2     ; 39
+                .word L9157     ; 40
+                .word L88FC     ; 41
+                .word L89DD     ; 42
+                .else
                 .word rts9B12; 12
                 .word L87FC   ; 13
                 .word L9173   ; 14
@@ -9937,8 +10086,9 @@ table_4:        .word L80F3; 0
                 .word L88D8   ; 34
                 .word L8C5A   ; 35
                 .word L8CC5   ; 36
+                .endif
 
-                .if version<=v10
+                .if version<vB10
 secret_message:
                 .byte 'M'<<1
                 .byte 'R'<<1
@@ -9972,7 +10122,7 @@ table_6:        .word LA3F5; 0
 
 LB27F:
                 jsr load_fwb    ; load FWB from (L0006) (equivalent to A34E in BASIC 2??)
-                .if version<=v10
+                .if version<vB10
                 ldy #0
                 .endif
                 lda fwb_sign

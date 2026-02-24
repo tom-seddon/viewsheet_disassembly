@@ -43,8 +43,9 @@ BBC ROMs marked as good in the ROM library:
   3]](https://tobylobster.github.io/rom_library/?md5=08fdaaab2e6c9f993a99060a9297f53b) -
   marked as known good in the ROM library
 
-This is far from all of the versions available! Coverage may yet
-increase. (But the Master-related versions were the priority.)
+Electron ROMs:
+
+- [E1.0](https://tobylobster.github.io/rom_library/?md5=d96ad778fef8b67ab55c1738fc5ec907)
 
 # build
 
