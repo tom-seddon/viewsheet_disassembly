@@ -7,10 +7,10 @@ project, as some versions of the MOS came with ViewSheet included.
 
 # versions covered
 
-The supplied code can build the following versions, which can be found
-in [The BBC Micro ROM
-Library](https://tobylobster.github.io/rom_library/), or in this repo
-in the `orig` folder.
+The supplied code can build the following versions, covering all the
+useful 1.0 (or later) ViewSheet ROMs in [The BBC Micro ROM
+Library](https://tobylobster.github.io/rom_library/). For ROM images,
+follow the links or see the files in this repo in the `orig` folder.
 
 Master 128 ROM originals:
 
@@ -24,7 +24,7 @@ Master 128 ROM variants:
 
 - [B1.0 [variant
   2]](https://tobylobster.github.io/rom_library/?md5=26044139006e9ec0960e609354daba41) -
-  similar to variant 1, but with the sideways RAM protection check
+  similar to variant 1, but with the sideways RAM protection
   disabled, and an extra mystery byte that shuffle some of the code
   around. Presumably built from the original source code
 - [B1.0 [variant
@@ -43,9 +43,22 @@ BBC ROMs marked as good in the ROM library:
   3]](https://tobylobster.github.io/rom_library/?md5=08fdaaab2e6c9f993a99060a9297f53b) -
   marked as known good in the ROM library
 
+BBC ROM variants:
+
+- [1.0 [variant
+  2]](https://tobylobster.github.io/rom_library/?md5=c191dba7350011c7ccfa77d47feb9245) -
+  same as variant 3, but with the sideways RAM protection disabled in
+  a way that isn't Master-friendly
+- [1.0 [variant
+  11]](https://tobylobster.github.io/rom_library/?md5=45a023e099d007e5b4c574ba5ccb0d59) -
+  same as variant 3, but with the sideways RAM protection disabled,
+  and the ROM marked as having no language entry point (
+
 Electron ROMs:
 
 - [E1.0](https://tobylobster.github.io/rom_library/?md5=d96ad778fef8b67ab55c1738fc5ec907)
+
+
 
 # build
 

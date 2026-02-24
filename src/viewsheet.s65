@@ -21,7 +21,7 @@ vI11=31                       ; I1.1
 
 ; variant number, for cases where it makes a difference.
 variant=-1
-                
+
 ; if true, replace sideways RAM protection thingy with 3 x NOPs
 patch_out_sideways_ram_protection=false
 
@@ -254,7 +254,11 @@ service_entry:
 
 ;-------------------------------------------------------------------------
 
+                .if version==v10&&variant==11
+                .byte %10000010 ; service entry only
+                .else
                 .byte %11000010 ; service entry+language entry
+                .endif
                 .char copyright - language_entry
                 .if version>=vB101
                 .byte 3
@@ -1584,6 +1588,8 @@ L8685:
                 bne L8693           ; taken if parasite
                 .if version==vB10&&variant==2
                 bit L006E       ; ???
+                .elif version==v10&&variant==2
+                inc $d000       ; questionable
                 .elif patch_out_sideways_ram_protection
                 nop
                 nop

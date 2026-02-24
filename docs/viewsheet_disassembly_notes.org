@@ -34,7 +34,7 @@ G/B indicates whether ROM is marked as Good or Bad in the library.
 | ViewSheet vA0.7 [variant 1].rom               | G   |        | https://tobylobster.github.io/rom_library/?md5=ad4378af588078e382afb2d8bf873523 |
 | ViewSheet vA0.7 [variant 2].rom               |     |        | https://tobylobster.github.io/rom_library/?md5=68d9b52f0ecd8dd3465f8f411dda11b9 |
 | ViewSheet v1.0 [variant 1].rom                |     |        | https://tobylobster.github.io/rom_library/?md5=e08bc350f4721db3120b2b6176e807b6 |
-| ViewSheet v1.0 [variant 2].rom                |     |        | https://tobylobster.github.io/rom_library/?md5=c191dba7350011c7ccfa77d47feb9245 |
+| ViewSheet v1.0 [variant 2].rom                |     | y      | https://tobylobster.github.io/rom_library/?md5=c191dba7350011c7ccfa77d47feb9245 |
 | ViewSheet v1.0 [variant 3].rom                | G   | y      | https://tobylobster.github.io/rom_library/?md5=08fdaaab2e6c9f993a99060a9297f53b |
 | Viewsheet v1.0 [variant 4] [bad].rom          | B   |        | https://tobylobster.github.io/rom_library/?md5=bffeb1a5c085e6c80690e73799b28d30 |
 | Viewsheet v1.0 [variant 5] [bad].rom          | B   |        | https://tobylobster.github.io/rom_library/?md5=d578b56ad965972dfe6ce52e8288ea8d |
@@ -43,7 +43,7 @@ G/B indicates whether ROM is marked as Good or Bad in the library.
 | ViewSheet v1.0 [variant 8].rom                |     |        | https://tobylobster.github.io/rom_library/?md5=da0c96c2f524784614caba17572ad022 |
 | ViewSheet v1.0 [variant 9].rom                |     |        | https://tobylobster.github.io/rom_library/?md5=b175c0d4fe5101a1438240417502a101 |
 | ViewSheet v1.0 [variant 10].rom               |     |        | https://tobylobster.github.io/rom_library/?md5=05f1305700e3e94d5fc423e5b363dfbc |
-| ViewSheet v1.0 [variant 11].rom               |     |        | https://tobylobster.github.io/rom_library/?md5=45a023e099d007e5b4c574ba5ccb0d59 |
+| ViewSheet v1.0 [variant 11].rom               |     | y      | https://tobylobster.github.io/rom_library/?md5=45a023e099d007e5b4c574ba5ccb0d59 |
 | ViewSheet v1.0 [variant 12].rom               |     |        | https://tobylobster.github.io/rom_library/?md5=b7279e85804e1758934359dd2453d358 |
 | ViewSheet vB1.0 [variant 1].rom               | G   | y      | https://tobylobster.github.io/rom_library/?md5=7d5a80a8ce929d0a0f6ca8626cb9f436 |
 | ViewSheet vB1.0 [variant 2].rom               |     | y      | https://tobylobster.github.io/rom_library/?md5=26044139006e9ec0960e609354daba41 |
@@ -78,7 +78,7 @@ Examining the ones not marked as bad.
 *** 2 - good/questionable
 
 - changes the swram protection instruction to =INC $d000=. Bit risky
-  on a Mastebr
+  on a Master
 
 *** 3
 
