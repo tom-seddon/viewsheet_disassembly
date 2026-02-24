@@ -50,7 +50,7 @@ G/B indicates whether ROM is marked as Good or Bad in the library.
 | ViewSheet vB1.0 [variant 3].rom               |     | y      | https://tobylobster.github.io/rom_library/?md5=35ae47c386d347604d41baf2faa042d4 |
 | Electron ViewSheet vE1.0.rom                  |     |        | https://tobylobster.github.io/rom_library/?md5=d96ad778fef8b67ab55c1738fc5ec907 |
 | Master MOS v3.50 - ViewSheet vB1.01.rom       |     | y      | https://tobylobster.github.io/rom_library/?md5=1bc68b7c5eba6a2de2a43c9d1d9d983b |
-| Olivetti Prodest PC128S - ViewSheet vI1.1.rom |     |        | https://tobylobster.github.io/rom_library/?md5=ad630f9328fdef66ee0d3d8d65f1132f |
+| Olivetti Prodest PC128S - ViewSheet vI1.1.rom |     | y      | https://tobylobster.github.io/rom_library/?md5=ad630f9328fdef66ee0d3d8d65f1132f |
 
 Other stuff found when searching for =ViewSheet=, that aren't
 included:
@@ -65,6 +65,59 @@ included:
 - MOS 3.50 :: Viewsheet B1.01.MOS 3.50.rom
 
 * Version notes
+
+** ViewSheet 1.0 variants
+
+Examining the ones not marked as bad.
+
+*** 1 - bad
+
+- last few bytes of the ROM are invalid
+- there's a =jsr $0de4= at +$0319, which is obviously wrong
+
+*** 2 - good/questionable
+
+- changes the swram protection instruction to =INC $d000=. Bit risky
+  on a Mastebr
+
+*** 3
+
+Marked as good. Nothing obviously surprising compared to B1.0.
+
+*** 6 - bad
+
+- last byte is $00
+- =bne $8847= at $884a has become a =bne $8843=, which will probably
+  make a mess...
+
+*** 7 - bad
+
+Obvious general corruption.
+
+*** 8 - bad 
+
+- only 8 KB (first 8 KB of variant 11)
+- has the language entry point bit cleared in the header
+- has the sideways RAM protection correctly NOP'd out
+
+*** 9 - bad
+
+- only 8 KB (first 8 KB of variant 3)
+
+*** 10 - bad
+
+- only 8 KB (first 8 KB of variant 6)
+
+*** 11 - good/questionable
+
+- has the language entry point bit cleared in the header (though this
+  doesn't seem to do anything obvious?)
+- has the sideways RAM protection correctly NOP'd out
+
+*** 12 - bad
+
+- last bit of the ROM has been somehow overwritten by the *SAVE
+  command that possibly produced the file
 
 ** ViewSheet A0.7 variants
 

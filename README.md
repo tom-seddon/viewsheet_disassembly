@@ -32,6 +32,11 @@ Master 128 ROM variants:
   same as variant 1, but with the sideways RAM protection check
   removed with `NOP`s. Presumably a binary patch
 
+Olivetti PC 128 S version:
+
+- [I1.1](https://tobylobster.github.io/rom_library/?md5=ad630f9328fdef66ee0d3d8d65f1132f) -
+  esesntially B1.01 with Italian strings
+
 BBC ROMs marked as good in the ROM library:
 
 - [1.0 [variant
