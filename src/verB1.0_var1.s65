@@ -1,2 +1,4 @@
+version=vB10
+variant=1
                 .include "viewsheet.s65"
                 

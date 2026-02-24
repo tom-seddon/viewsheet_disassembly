@@ -1,4 +1,6 @@
-verB10_var2=true
+version=vB10
+;verB10_var2=true
 sideways_ram_protection=false
+variant=2
                 .include "viewsheet.s65"
                 

@@ -1,3 +1,14 @@
+; Version constants.
+
+; These are in some kind of numerical order.
+
+vA07=0                        ; A0.7
+v10=1                         ; 1.00
+vB10=2                        ; B1.0
+vB101=3                       ; B1.01
+
+;-------------------------------------------------------------------------
+
 ; Feature/variant flags/hacks/etc.
 ;
 ; If there's any obvous name for what these toggles might do, it gets
@@ -6,32 +17,26 @@
 
                 .weak
 
-; if true, build B1.0 variant 2
-verB10_var2=false
-
+; variant number, for cases where it makes a difference.
+variant=-1
+                
 ; if true, replace sideways RAM protection thingy with 3 x NOPs
 patch_out_sideways_ram_protection=false
 
-; if true, build B1.01
-verB101=false
-
-; if true, build 1.0
-ver10=false
-                
 ; if true, handle 8-bit input (presumably related to the changes done
 ; for MOS 3.50/MOS 5.11/PC 128 S). Requires 65c02.
 ;
 ; (I guessed at some of the changes)
-handle_8_bit_input=verB101
+handle_8_bit_input=false
 
 ; if true, include basic sideways RAM protection: a little routine
 ; that tries to modify some a bit of the code (and not in a good way)
 ; unless running in the second processor
-include_sideways_ram_protection=!verB101
+include_sideways_ram_protection=true
 
 ; if true, use CMOS instructions here and there, not obviously related
 ; to any other specific feature.
-cmos_instructions=verB101
+cmos_instructions=false
                 
                 .endweak
 
@@ -228,39 +233,43 @@ service_entry:
 
                 .byte %11000010 ; service entry+language entry
                 .char copyright - language_entry
-                .if verB101
+                .if version>=vB101
                 .byte 3
-                .elif ver10
-                .byte 1
+                .elif version>=vB10
+                .byte 2
                 .else
-                .byte 2         ; version number
+                .byte 1
                 .endif
 asc_8009:       .text "ViewSheet"
                 .byte 0
-                .if verB101
+                .if version==vB101
                 .text "B1.01"
-                .elif ver10
+                .elif version==v10
                 .text "1.0"
-                .else
+                .elif version==vA07
+                .text "A0.7"
+                .elif version==vB10
                 .text "B1.0"
+                .else
+                .error
                 .endif
 copyright:      .byte 0
-                .if verB101
+                .if version>=vB101
                 .text "(C)1984Acornsoft"
-                .elif ver10
-                .text "(C) 1983 Protechnic"
-                .else
+                .elif version>=vB10
                 .text "(C) 1984 Acornsoft"
+                .else
+                .text "(C) 1983 Protechnic"
                 .endif
                 .byte 0
 
 ;-------------------------------------------------------------------------
 
-                .if verB10_var2
+                .if version==vB10&&variant==2
                 .byte $50
                 .endif
 L802B:
-                .if ver10
+                .if version==v10
                 cmp #4
                 beq L8033
                 cmp #9
@@ -276,7 +285,7 @@ L8033:
                 lda $103,x      ; get original A
                 cmp #9
                 beq svc_help
-                .if !ver10
+                .if version>v10
                 cmp #7
                 beq svc_osbyte
                 cmp #2
@@ -331,7 +340,7 @@ svc_done:
 
 ;-------------------------------------------------------------------------
 
-                .if !ver10
+                .if version>v10
 
 svc_private_workspace:
                 tsx
@@ -345,7 +354,7 @@ svc_private_workspace:
 
 ;-------------------------------------------------------------------------
 
-                .if !ver10
+                .if version>v10
 svc_osbyte:
                 lda entry_A     ; OSBYTE/OSWORD A value
                 cmp #$A3
@@ -414,7 +423,7 @@ L80C7:
                 sta BRKV+1
                 jsr LAE34
                 jsr LAE73
-                .if !ver10
+                .if version>v10
                 lda #$83        ; OSBYTE read OSHWN
                 jsr OSBYTE
                 cpx OSWHM
@@ -472,7 +481,7 @@ L8104:
 ;-------------------------------------------------------------------------
 
                 .byte $D
-                .if ver10
+                .if version==v10
                 .text "Bytes Free "
                 .else
                 .text "Bytes free "
@@ -491,10 +500,10 @@ L8153:
 
 ;-------------------------------------------------------------------------
 
-                .if ver10
-                .text "Screen Mode "
-                .else
+                .if version>v10
                 .text "Screen mode "
+                .else
+                .text "Screen Mode "
                 .endif
                 .byte 0
 
@@ -504,7 +513,7 @@ L8153:
                 ora #'0'
                 jsr OSWRCH
                 jsr OSNEWL
-                .if !ver10
+                .if version>v10
                 lda L06A5
                 beq command_loop
                 .endif
@@ -513,7 +522,7 @@ L8153:
                 .text "Printer "
                 .byte 0
 
-                .if ver10
+                .if version<=v10
                 lda L06A5
                 beq print_default
                 .endif
@@ -527,7 +536,7 @@ L8184:
                 inx
                 bne L8184
 
-                .if ver10
+                .if version<=v10
 print_default:
                 jsr print_following_string
                 .text "default",13,0
@@ -549,7 +558,7 @@ command_loop_2:
 
 ;-------------------------------------------------------------------------
 
-                .if !ver10
+                .if version>v10
                 lda #<OSASCI
                 sta L000F
                 lda #>OSASCI
@@ -569,7 +578,7 @@ command_loop_2:
                 .endif
                 ldx #$66
                 lda #0          ; OSWORD get input
-                .if !ver10
+                .if version>v10
                 sta L005D
                 .endif
                 sta L005E
@@ -635,7 +644,7 @@ do_star_command:
 L820B:
                 jsr LAF4F
                 bcs L8258
-                .if ver10
+                .if version<=v10
                 pha
                 and #$7f
                 cmp #8
@@ -835,7 +844,7 @@ L82E6:
                 bne L8351
 
 L82F8:
-                .if ver10
+                .if version<=v10
                 jsr L855F
                 lda #0
                 sta L0502
@@ -872,7 +881,7 @@ L830D:
                 bne L8351
 
 L831D:
-                .if ver10
+                .if version<=v10
                 jsr L855F
                 lda #$c0
                 sta L0502
@@ -883,7 +892,7 @@ L831D:
                 .endif
                 lda screen_mode
                 sta L0063
-                .if ver10
+                .if version<=v10
                 lda #$ff
                 jsr L8477
                 .else
@@ -979,7 +988,7 @@ L83A3:
                 tax
                 tya
                 adc L006B
-                .if !ver10
+                .if version>v10
                 bcs L833D
                 .endif
                 cmp HIMEM+1
@@ -989,7 +998,7 @@ L83A3:
                 bcs L833D
 
 L83B6:
-                .if ver10
+                .if version<=v10
                 jsr L855F
                 lda L006A
                 sta L0502
@@ -1113,7 +1122,7 @@ L8456:
 
 ;-------------------------------------------------------------------------
 
-                .if !ver10
+                .if version>v10
 L8467:
                 stx L0502
                 sty L0503
@@ -1440,7 +1449,7 @@ L8654:
 
 ;-------------------------------------------------------------------------
 
-                .if ver10
+                .if version<=v10
 L863E:
                 ldx #0
 L8640:
@@ -1508,7 +1517,7 @@ L8685:
                 .if include_sideways_ram_protection
                 lda is_second_processor; 0 if host, non-0 if parasite
                 bne L8693           ; taken if parasite
-                .if verB10_var2
+                .if version==vB10&&variant==2
                 bit L006E       ; ???
                 .elif patch_out_sideways_ram_protection
                 nop
@@ -1600,7 +1609,7 @@ L86E2:
 ;-------------------------------------------------------------------------
 
                 .text "SLOT="
-                .if ver10
+                .if version<=v10
                 .byte 0
                 jsr print_following_string
                 .endif
@@ -1610,7 +1619,7 @@ L86E2:
 
 ;-------------------------------------------------------------------------
 
-                .if ver10
+                .if version<=v10
                 lda #<OSASCI
                 sta L000F
                 lda #>OSASCI
@@ -1750,7 +1759,7 @@ L879F:
 
 L87A2:
                 jsr LA171
-                .if ver10
+                .if version<=v10
                 lda #$ff
                 sta L0054
                 sta L0055
@@ -1857,10 +1866,10 @@ L880A:
                 tay
                 bcs L87BC
                 jsr LA310
-                .if ver10
-                bcs rts87AC
-                .else
+                .if version>v10
                 bcs rts87FB
+                .else
+                bcs rts87AC
                 .endif
                 lda #$40
                 sta L004B
@@ -2269,12 +2278,12 @@ L8A61:
                 bpl L8A61
                 rol L005F
                 bcs L8ABD
-                .if ver10
+                .if version<=v10
                 lda L0064
                 pha
                 .endif
                 jsr LAB8B
-                .if ver10
+                .if version<=v10
                 pla
                 tax
                 cpx L06C1
@@ -2331,7 +2340,7 @@ L8ABD:
 
 ;-------------------------------------------------------------------------
 
-                .if !verB101
+                .if version<vB101
 L8AC2:
                 jsr LAB02
                 bcs rts8AD3
@@ -2737,11 +2746,11 @@ L8D35:
 L8D3F:
                 inc L004A
                 ldx #$FF
-                .if ver10
-                jmp L8BE1
-                .else
+                .if version>v10
                 jsr L8BE1
                 jmp flush_input_buffer
+                .else
+                jmp L8BE1
                 .endif
 
 ;-------------------------------------------------------------------------
@@ -3317,13 +3326,13 @@ L9071:
 ;-------------------------------------------------------------------------
 
 L9076:
-                .if ver10
-                dec L0054
-                dec L0055
-                .else
+                .if version>v10
                 lda #$FF
                 sta L0054
                 sta L0055
+                .else
+                dec L0054
+                dec L0055
                 .endif
                 rts
 
@@ -4942,7 +4951,7 @@ L9927:
                 dey
                 bne L9927
 
-                .if ver10
+                .if version<=v10
                 sta L005D
                 .endif
 
@@ -5793,10 +5802,10 @@ L9D5A:
 L9D64:
                 dey
                 lda fp_slot_0,y
-                .if ver10
-                clc
-                .else
+                .if version>v10
                 sec
+                .else
+                clc
                 .endif
                 bne L9D50
 
@@ -9057,12 +9066,12 @@ LAD81:
 ;-------------------------------------------------------------------------
 
 LAD84:
-                .if ver10
+                .if version>v10
+                jsr flush_input_buffer
+                .else
                 lda #$15
                 ldx #$00
                 jsr OSBYTE
-                .else
-                jsr flush_input_buffer
                 .endif
                 jsr OSRDCH
                 cmp #27
@@ -9131,7 +9140,7 @@ pla_rts:
 
 ;-------------------------------------------------------------------------
 
-                .if !ver10
+                .if version>v10
 flush_input_buffer:
                 lda #$15        ; OSBYTE flush specific buffer
                 ldx #0          ; 0 = input buffer
@@ -9283,7 +9292,7 @@ LAE34:
                 dex
                 dex
                 stx num_rows    ; (num displays rows minus 3)
-                .if !ver10
+                .if version>v10
                 lda #$A3        ; OSBYTE Application Support
                 ldx #$FF        ; $ff = View family
                 stx is_second_processor; 0 if host, non-0 if parasite
@@ -9291,12 +9300,12 @@ LAE34:
                 jsr OSBYTE
                 ldx #0
                 cpy #2
-                .if !verB101
+                .if version<vB101
                 beq LAE70
                 .endif
                 .endif
                 lda #$82        ; OSBYTE read machine higher order address
-                .if ver10
+                .if version<=v10
                 sta is_second_processor
                 .endif
                 jsr OSBYTE
@@ -9739,12 +9748,8 @@ LB084:
                 .word 100
                 .word 1000
                 .word 10000
-                .if !ver10
-                .byte $4D       ; M
-                .byte $52       ; R
-                .byte $4A       ; J
-                .byte $43       ; C
-                .byte 0
+                .if version>v10
+                .text 'MRJC',0
                 .endif
 LB091:
                 .byte $44       ; D
@@ -9771,7 +9776,7 @@ command: .macro
                 .endmacro
                 
 commands:
-                .if ver10
+                .if version<=v10
                 .command "JCP",$80
                 .endif
                 .command "PROtect",$81
@@ -9879,7 +9884,7 @@ table_0:        .word LA53A; 0
                 .word oper_gt_QQ    ; 41
                 .word ope_lt_QQ     ; 42
 table_2:
-                .if ver10
+                .if version<=v10
                 .word L863E
                 .endif
                 .word L828C; 0
@@ -9923,7 +9928,7 @@ table_4:        .word L80F3; 0
                 .word L89AE   ; 23
                 .word L89B2   ; 24
                 .word L87A2   ; 25
-                .if verB101
+                .if version==vB101
                 .word rts9B12   ; 26
                 .else
                 .word L8AC2   ; 26
@@ -9939,7 +9944,7 @@ table_4:        .word L80F3; 0
                 .word L8C5A   ; 35
                 .word L8CC5   ; 36
 
-                .if ver10
+                .if version<=v10
 secret_message:
                 .byte 'M'<<1
                 .byte 'R'<<1
@@ -9973,7 +9978,7 @@ table_6:        .word LA3F5; 0
 
 LB27F:
                 jsr load_fwb    ; load FWB from (L0006) (equivalent to A34E in BASIC 2??)
-                .if ver10
+                .if version<=v10
                 ldy #0
                 .endif
                 lda fwb_sign
@@ -11348,7 +11353,7 @@ LB994:
 
 ; unused code??
                 
-                .if !verB101
+                .if version<vB101
                 jsr LB94D
                 jsr inc_fwa_mantissa
                 jmp LB94D
@@ -12464,7 +12469,7 @@ LBFFB:
 
 ;-------------------------------------------------------------------------
 
-                .if verB101
+                .if version==vB101
                 .fill $c000-*,$ff
                 .endif
 

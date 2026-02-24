@@ -1,3 +1,6 @@
-verB101=true
+version=vB101
+handle_8_bit_input=true
+include_sideways_ram_protection=false
+cmos_instructions=true
                 .include "viewsheet.s65"
                 

@@ -1,2 +1,4 @@
+version=vB10
 patch_out_sideways_ram_protection=true
                 .include "viewsheet.s65"
+                
