@@ -6,6 +6,10 @@
   ((nil . ((compile-command . "cd ~/github/viewsheet_disassembly && make _tom"))))
 #+end_src
 
+#+begin_src elisp
+  ((nil . ((compile-command . "cd D:\\tom\\github\\viewsheet_disassembly && make _tom"))))
+#+end_src
+
 * general notes
 
 - the FP routines look to be the ones from the BASIC 2 ROM, pretty

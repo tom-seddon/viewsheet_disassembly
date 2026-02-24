@@ -5,6 +5,7 @@ MAKEFLAGS+=--no-print-directory
 ifeq ($(OS),Windows_NT)
 PYTHON:=py -3
 TASSCMD:=bin\64tass.exe
+SHELL:=$(windir)\system32\cmd.exe
 else
 PYTHON:=/usr/bin/python3
 TASSCMD:=64tass

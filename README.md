@@ -74,10 +74,19 @@ the following from inside the working copy:
 
 ## prerequisites
 
-* Unix-type system
+Tested on Windows, macOS and Linux.
+
+Required for all:
+
 * Python 3.x
+
+Required for macOS and Linux:
+
 * [`64tass`](http://tass64.sourceforge.net/) (I use r3243)
 * GNU Make
+
+(Prebuilt standalone Windows EXEs, and a `make.bat`, are included in
+the repo.)
 
 ## build steps
 
