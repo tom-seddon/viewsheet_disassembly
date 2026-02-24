@@ -45,10 +45,6 @@ italian=false
                 
                 .endweak
 
-                .if version==vE10
-L979D_vE10=$979d
-                .endif
-                
 ;-------------------------------------------------------------------------
 
 texti: .macro etext,itext
@@ -4572,7 +4568,7 @@ L9704:
 
 L9707:
                 .if version==vE10
-                jsr L979D_vE10
+                jsr L979D
                 .else
                 lda #30
                 jsr OSWRCH
