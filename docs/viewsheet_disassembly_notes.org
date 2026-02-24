@@ -11,6 +11,8 @@
 - the FP routines look to be the ones from the BASIC 2 ROM, pretty
   much
 
+ROM Library thread post: https://www.stardot.org.uk/forums/viewtopic.php?p=477631#p477631
+
 * book refs
 
 - ABRUG :: Advanced BASIC ROM User Guide
