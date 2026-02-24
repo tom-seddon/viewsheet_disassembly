@@ -1,0 +1,7 @@
+version=vI11
+italian=true
+handle_8_bit_input=true
+include_sideways_ram_protection=false
+cmos_instructions=true
+                .include "viewsheet.s65"
+                

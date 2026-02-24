@@ -66,6 +66,29 @@ included:
 
 * Version notes
 
+** ViewSheet A0.7 variants
+
+This was really quite different from 1.0 and I got bogged down.
+
+Differences between the 2 variants are:
+
+| Offset | var1 | var2 | xor | what                      |
+|--------+------+------+-----+---------------------------|
+| $1cad  | $1c  | $5c  | $40 | LSB of jsr operand        |
+| $3027  | $02  | $0a  | $08 | table I never figured out |
+
+The jsr operand:
+
+- variant 1 :: =jsr $ae1c=
+- variant 2 :: =jsr $ae5c=
+
+ae1c doesn't look like a good jump target, but ae5c would make sense.
+
+I never figured out the table, but the entry is $0a in the other
+versions.
+
+So this suggests that variant 2 is actually the good one.
+
 ** ViewSheet B1.0 variants
 
 *** Variant 1
@@ -89,16 +112,9 @@ And no sideways RAM protection thingy at +$0690.
 Same as Variant 1, but with the sideways RAM protection thing at
 +$0690 replaced with NOPs.
 
-** ViewSheet B1.01
-
-Everything changed compared to B1.01, but it looks like the code was
-probably mostly similar.
-
 ** ViewSheet I1.1
 
-Under 16 KB, but it looks like it could be ok - it ends with what
-looks like =loc_BFFB= (with different constant due to localised error
-messages).
+B1.01 with Italian strings, pretty much.
 
 * memory map
 

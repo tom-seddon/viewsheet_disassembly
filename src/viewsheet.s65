@@ -3,9 +3,10 @@
 ; These are in some kind of numerical order.
 
 vA07=0                        ; A0.7
-v10=1                         ; 1.00
-vB10=2                        ; B1.0
-vB101=3                       ; B1.01
+v10=10                        ; 1.00
+vB10=20                       ; B1.0
+vI11=31                       ; I1.1
+vB101=30                      ; B1.01
 
 ;-------------------------------------------------------------------------
 
@@ -37,9 +38,26 @@ include_sideways_ram_protection=true
 ; if true, use CMOS instructions here and there, not obviously related
 ; to any other specific feature.
 cmos_instructions=false
+
+; if true, messages in Italian.
+italian=false
                 
                 .endweak
 
+;-------------------------------------------------------------------------
+
+texti: .macro etext,itext
+                .if italian
+                .text (\itext)
+                .else
+                .text (\etext)
+                .endif
+                .endmacro
+
+;-------------------------------------------------------------------------
+
+contents_x=size(aContents)
+                
 ;-------------------------------------------------------------------------
 
 L0000=$0
@@ -250,11 +268,15 @@ asc_8009:       .text "ViewSheet"
                 .text "A0.7"
                 .elif version==vB10
                 .text "B1.0"
+                .elif version==vI11
+                .text "I1.1"
                 .else
                 .error
                 .endif
 copyright:      .byte 0
-                .if version>=vB101
+                .if version==vI11
+                .text "(C)1984Acorn"
+                .elif version>=vB101
                 .text "(C)1984Acornsoft"
                 .elif version>=vB10
                 .text "(C) 1984 Acornsoft"
@@ -484,7 +506,7 @@ L8104:
                 .if version==v10
                 .text "Bytes Free "
                 .else
-                .text "Bytes free "
+                .texti "Bytes free ","Bytes liberi "
                 .endif
                 .byte 0
 
@@ -519,7 +541,7 @@ L8153:
                 .endif
                 jsr print_following_string; print 0-terminated string following call
                                           ; (if char bit 7 set, jump to command_loop)
-                .text "Printer "
+                .texti "Printer ","Stampante "
                 .byte 0
 
                 .if version<=v10
@@ -612,7 +634,7 @@ L81E3:
 
 ;-------------------------------------------------------------------------
 
-                .text "Command?"
+                .texti "Command?","Comando?"
                 .byte $FF
 
 ;-------------------------------------------------------------------------
@@ -694,7 +716,8 @@ L823E:
 
 ;-------------------------------------------------------------------------
 
-aNotEnoughMemory:.text "Not enough memory"
+aNotEnoughMemory:
+                .texti "Not enough memory","Manca memoria"
                 .byte $FF
 
 ;-------------------------------------------------------------------------
@@ -708,7 +731,7 @@ L8258:
 
 ;-------------------------------------------------------------------------
 
-                .text "Syntax?"
+                .texti "Syntax?","Sintassi?"
                 .byte $FF
 
 ;-------------------------------------------------------------------------
@@ -780,7 +803,8 @@ L82AA:
 
 ;-------------------------------------------------------------------------
 
-aHeadings:      .text "Headings "
+aHeadings:
+                .texti "Headings ","Titoli "
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -795,7 +819,8 @@ L82BE:
 
 ;-------------------------------------------------------------------------
 
-aProtection:    .text "Protection "
+aProtection:
+                .texti "Protection ","Protezione "
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -934,7 +959,8 @@ L8351:
 
 ;-------------------------------------------------------------------------
 
-aBadFile:       .text "Bad file"
+aBadFile:
+                .texti "Bad file","File err."
                 .byte $FF
 
 ;-------------------------------------------------------------------------
@@ -965,7 +991,8 @@ L837A:
 
 ;-------------------------------------------------------------------------
 
-aFileNotFound:  .text "File not found"
+aFileNotFound:
+                .texti "File not found","Manca file"
                 .byte $FF
 
 ;-------------------------------------------------------------------------
@@ -1608,13 +1635,13 @@ L86E2:
 
 ;-------------------------------------------------------------------------
 
-                .text "SLOT="
+                .texti "SLOT=","CELLA="
                 .if version<=v10
                 .byte 0
                 jsr print_following_string
                 .endif
                 .byte $D
-                .text "CONTENTS="
+aContents: .texti "CONTENTS=","CONTENUTO="
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -1649,7 +1676,7 @@ L8709:
                 sta L0060
 
 L8735:
-                lda error_strings,x; "Brackets"
+                lda error_strings,x
                 beq L8742
                 jsr OSWRCH
                 inc L0060
@@ -1789,12 +1816,12 @@ rts87BB:
 ;-------------------------------------------------------------------------
 
 L87BC:
-                lda #$89
-                jsr LAD4E    ; !! A=something...
+                lda #$80|size(aProtected)
+                jsr LAD4E
 
 ;-------------------------------------------------------------------------
 
-aProtected:     .text "Protected"
+aProtected: .texti "Protected","Protetta"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -1815,12 +1842,12 @@ L87CC:
                 beq L880A
 
 L87DE:
-                lda #8
-                jsr LAD4E    ; !! A=something...
+                lda #size(aTooLong)
+                jsr LAD4E
 
 ;-------------------------------------------------------------------------
 
-                .text "Too long"
+aTooLong: .texti "Too long","Troppo lunga"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -1830,12 +1857,12 @@ L87DE:
 ;-------------------------------------------------------------------------
 
 L87EF:
-                lda #$86
-                jsr LAD4E    ; !! A=something...
+                lda #$80|size(aMemory)
+                jsr LAD4E
 
 ;-------------------------------------------------------------------------
 
-                .text "Memory"
+aMemory: .texti "Memory","Memoria"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2027,12 +2054,9 @@ rts88E5:
 ;-------------------------------------------------------------------------
 
 L88E6:
-                lda #$C
+                lda #size(aRowHeading)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Row heading?"
+aRowHeading: .texti "Row heading?","Titolo riga?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2041,12 +2065,9 @@ L88E6:
                 bne L8913
 
 L88FC:
-                lda #$F
+                lda #size(aColumnHeading)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Column heading?"
+aColumnHeading: .texti "Column heading?","Titolo col?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2141,11 +2162,11 @@ L8994:
 
 L8997:
                 lda #$E
-                jsr LAD4E    ; !! A=something...
+                jsr LAD4E
 
 ;-------------------------------------------------------------------------
 
-aBadHeading:    .text "Bad Heading"
+aBadHeading:    .texti "Bad Heading","Titolo err."
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2207,12 +2228,9 @@ rts89E5:
 ;-------------------------------------------------------------------------
 
 L89E6:
-                lda #7
+                lda #size(aWindow)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Window?"
+aWindow: .texti "Window?","Finestra?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2232,12 +2250,9 @@ L89FD:
                 jsr L942F
                 bcs L89FA
                 jsr L923A
-                lda #$22
+                lda #size(header)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Wi TopL  BotR  Pos Cw  Bw Fmt  Opt"
+header: .texti "Wi TopL  BotR  Pos Cw  Bw Fmt  Opt","Fi SupS  InfD  Pos Cw  Bw Fmt  Opz"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2361,12 +2376,9 @@ L8AD4:
                 jsr LAB02
                 bcs rts8B27
                 bmi rts8B27
-                lda #7
+                lda #size(aFormat)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Format?"
+aFormat: .texti "Format?","Formato?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2756,12 +2768,9 @@ L8D3F:
 ;-------------------------------------------------------------------------
 
 L8D49:
-                lda #5
+                lda #size(aSlot)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "Slot?"
+aSlot: .texti "Slot?","Cella?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2836,12 +2845,9 @@ rts8DB3:
 L8DB4:
                 lda #0
                 sta L0500
-                lda #$A
+                lda #size(aFromTo)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "From - To?"
+aFromTo: .texti "From - To?","Da - a?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2924,12 +2930,9 @@ L8E25:
                 beq L8E92
 
 L8E3E:
-                lda #5
-                jsr LAD4E    ; !! A=something...
-
-;-------------------------------------------------------------------------
-
-                .text "Range"
+                lda #size(aRange)
+                jsr LAD4E
+aRange: .texti "Range","Portata"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -2939,12 +2942,9 @@ L8E3E:
 ;-------------------------------------------------------------------------
 
 L8E4C:
-                lda #4
-                jsr LAD4E    ; !! A=something...
-
-;-------------------------------------------------------------------------
-
-                .text "Edge"
+                lda #size(aEdge)
+                jsr LAD4E
+aEdge: .texti "Edge","Margine"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -3129,12 +3129,9 @@ L8F53:
                 sbc L0060
                 tax
                 jsr L9C31
-                lda #$16
+                lda #size(aRelativeNoChange)
                 jsr LAD53
-
-;-------------------------------------------------------------------------
-
-                .text "R)elative, N)o change?"
+aRelativeNoChange: .texti "R)elative, N)o change?","R)elativa, N)on cambio?"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -4645,7 +4642,7 @@ L97A1:
 
 L97B1:
                 ldy #1
-                lda #9
+                lda #contents_x
                 bne gotoxy      ; move text cursor
                                 ; Entry: A=X coord
                                 ;        Y=Y coord
@@ -4877,13 +4874,10 @@ L98CE:
 
 ;-------------------------------------------------------------------------
 
-L98D3:      .byte $3F
-                .byte $45
-                .byte $72
-                .byte $72
-                .byte $6F
-                .byte $72
+L98D3:
+                .texti "?Error","?Errore"
                 .byte 0
+
 L98DA:          .byte $D7
                 .byte $FF
                 .byte $FF
@@ -5504,7 +5498,7 @@ L9BFD:
 
 ;-------------------------------------------------------------------------
 
-aBlank:         .text "*Blank*"
+aBlank:         .texti "*Blank*","*Vuota*"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -5513,7 +5507,7 @@ L9C0D:
                 pha
                 tya
                 pha
-                lda #9
+                lda #contents_x
                 ldy #0
                 jsr gotoxy      ; move text cursor
                                 ; Entry: A=X coord
@@ -5558,7 +5552,7 @@ L9C3B:
                 pha
                 lda num_columns
                 sec
-                sbc #10
+                sbc #contents_x+1
                 sta L005F
                 pla
                 rts
@@ -7594,7 +7588,7 @@ LA625:
                 beq LA625
 
 LA633:
-                lda #error_lookup - error_strings; "Brackets"
+                lda #error_lookup - error_strings
                 jmp LA585                     ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
@@ -7958,7 +7952,7 @@ rtsA811:
 ;-------------------------------------------------------------------------
 
 LA812:
-                lda #$87
+                lda #error_too_few_arguments-error_strings
                 bne LA825
 
 ;-------------------------------------------------------------------------
@@ -7971,7 +7965,7 @@ LA816:
                 ldy #5
                 lda (L0006),y
                 bpl rtsA7D4
-                lda #error_propagated - error_strings; "Brackets"
+                lda #error_propagated - error_strings
 
 LA825:
                 jmp LA585    ; ??longjmp kind of thing back to main loop with A=error code
@@ -8091,7 +8085,7 @@ LA8AE:
                 bcs rtsA8CC
 
 LA8B5:
-                lda #error_out_of_range - error_strings; "Brackets"
+                lda #error_out_of_range - error_strings
                 jmp LA585                           ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
@@ -8119,15 +8113,15 @@ rtsA8CC:
 LA8CD:
                 lda #0          ; OSFIND close file
                 jsr OSFIND
-                lda #error_bad_file - error_strings; "Brackets"
+                lda #error_bad_file - error_strings
                 bne LA8DC                       ; always taken
 
 raise_fs_error:
-                lda #error_fs_error - error_strings; "Brackets"
+                lda #error_fs_error - error_strings
                 bne LA8DC                       ; always taken
 
 LA8DA:
-                lda #error_no_file - error_strings; "Brackets"
+                lda #error_no_file - error_strings
 
 LA8DC:
                 jmp LA585    ; ??longjmp kind of thing back to main loop with A=error code
@@ -8153,7 +8147,7 @@ LA8E8:
                 inx
                 cpx #$14
                 bne LA8E8
-                lda #$55
+                lda #error_too_many_files-error_strings
                 bne LA8DC    ; always taken
 
 LA8FE:
@@ -8338,7 +8332,7 @@ LA9F8:
 ;-------------------------------------------------------------------------
 
 LA9FB:
-                lda #error_range - error_strings; "Brackets"
+                lda #error_range - error_strings
                 jmp LA585                    ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
@@ -9255,7 +9249,7 @@ LAE19:
 
 ;-------------------------------------------------------------------------
 
-aNoFile:        .text "No File"
+aNoFile:        .texti "No File","Nessun File"
                 .byte $D
                 .byte 0
 
@@ -9799,35 +9793,35 @@ commands:
 
 ;-------------------------------------------------------------------------
 
-error_strings:  .text "Brackets"
+error_strings:  .texti "Brackets","Parentesi"
                 .byte 0
-error_range:    .text "Range"
+error_range:    .texti "Range","Portata"
                 .byte 0
-error_overflow: .text "Overflow"
+error_overflow: .texti "Overflow","Overflow"
                 .byte 0
-error_too_big:  .text "Too big"
+error_too_big:  .texti "Too big","Troppo grande"
                 .byte 0
-error_divide_by_0:.text "Divide by 0"
+error_divide_by_0:.texti "Divide by 0","Divis. per 0"
                 .byte 0
-error_negative_root:.text "-ve root"
+error_negative_root:.texti "-ve root","Rad.<0"
                 .byte 0
-error_log_range:.text "LOG range"
+error_log_range:.texti "LOG range","Argomento LOG"
                 .byte 0
-error_out_of_range:.text "Out of range"
+error_out_of_range:.texti "Out of range","Oltre limiti"
                 .byte 0
-error_bad_file: .text "Bad file"
+error_bad_file: .texti "Bad file","File err."
                 .byte 0
-error_too_many_files:.text "Too many files"
+error_too_many_files:.texti "Too many files","Troppi file"
                 .byte 0
-error_no_file:  .text "No file"
+error_no_file:  .texti "No file","Manca file"
                 .byte 0
-error_propagated:.text "Propagated"
+error_propagated:.texti "Propagated","Propagato"
                 .byte 0
-error_lookup:   .text "Lookup"
+error_lookup:   .texti "Lookup","Lookup"
                 .byte 0
-error_fs_error: .text "FS error"
+error_fs_error: .texti "FS error","Errore FD"
                 .byte 0
-error_too_few_arguments:.text "Too few arguments"
+error_too_few_arguments:.texti "Too few arguments","Mancano parametri"
                 .byte 0
 
 ;-------------------------------------------------------------------------
@@ -9928,7 +9922,7 @@ table_4:        .word L80F3; 0
                 .word L89AE   ; 23
                 .word L89B2   ; 24
                 .word L87A2   ; 25
-                .if version==vB101
+                .if version>=vB101
                 .word rts9B12   ; 26
                 .else
                 .word L8AC2   ; 26
@@ -11005,7 +10999,7 @@ inc_fwa_mantissa:
                 bne rtsB7D2
 
 too_big_error_QQ:
-                lda #error_too_big - error_strings; "Brackets"
+                lda #error_too_big - error_strings
                 jmp LA585                      ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
@@ -11658,7 +11652,7 @@ rtsBB23:
 ;-------------------------------------------------------------------------
 
 LBB24:
-                lda #error_divide_by_0 - error_strings; "Brackets"
+                lda #error_divide_by_0 - error_strings
                 jmp LA585                          ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
@@ -11839,7 +11833,7 @@ rtsBC3A:
 ;-------------------------------------------------------------------------
 
 LBC3B:
-                lda #error_negative_root - error_strings; "Brackets"
+                lda #error_negative_root - error_strings
 
 LBC3D:
                 jmp LA585    ; ??longjmp kind of thing back to main loop with A=error code
@@ -12464,7 +12458,7 @@ rtsBFFA:
 ;-------------------------------------------------------------------------
 
 LBFFB:
-                lda #error_overflow - error_strings; "Brackets"
+                lda #error_overflow - error_strings
                 jmp LA585                       ; ??longjmp kind of thing back to main loop with A=error code
 
 ;-------------------------------------------------------------------------
