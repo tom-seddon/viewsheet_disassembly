@@ -64,7 +64,7 @@ Electron ROMs:
 
 This repo has submodules. Clone it with `--recursive`:
 
-    git clone --recursive https://github.com/tom-seddon/mos320
+    git clone --recursive https://github.com/tom-seddon/viewsheet_disassembly
 	
 Alternatively, if you already cloned it non-recursively, you can do
 the following from inside the working copy:
